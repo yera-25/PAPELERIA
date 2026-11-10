@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papelería A B C — Sistema POS & Gestión Integral</title>
+    <link rel="icon" type="image/jpeg" href="LOGO.jpg">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- ================= 1. ENCABEZADO SUPERIOR INSTITUCIONAL ================= -->
+    <header class="app-header">
+        <div class="brand-section">
+            <img src="LOGO.jpg" alt="Logotipo Papelería A B C" class="brand-logo-img">
+            <div class="brand-text">
+                <h1>Papelería A B C</h1>
+                <div class="brand-tagline">Sistema POS Local & Inventario Autónomo | Entregable Unificado</div>
+            </div>
+        </div>
+
+        <!-- Pestañas Maestras de Navegación del Sistema -->
+        <nav class="header-center-nav">
+            <button class="nav-tab-btn active" data-tab="tab-pos">
+                Mostrador POS
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-inventario">
+                Almacén e Inventario
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-caja">
+                Control de Caja
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-reportes">
+                Reportes y Analítica
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-configuracion">
+                Perfiles y Contraseñas
+            </button>
+        </nav>
+
+        <div class="header-right-meta">
+            <div class="meta-chip" id="header-user-display" onclick="window.AUTH_MODULE.abrirModalLogin(false)" title="Clic para cambiar de perfil de usuario" style="cursor: pointer;">
+                <span style="color: #cbd5e1;">Sin sesión activa</span>
+            </div>
+            <button type="button" class="btn-secondary" style="font-size: 0.76rem; padding: 5px 10px; font-weight: 700; border-radius: 6px;" onclick="window.AUTH_MODULE.abrirModalLogin(false)" title="Cambiar de perfil de usuario">
+                Cambiar Perfil
+            </button>
+            <button type="button" id="btn-header-logout" class="btn-secondary" style="font-size: 0.76rem; padding: 5px 10px; font-weight: 700; border-radius: 6px; background: #ef4444; color: #ffffff; border: none; display: none;" onclick="window.AUTH_MODULE.logout()" title="Cerrar la sesión actual">
+                Cerrar Sesión
+            </button>
+            <div class="live-clock-badge" id="live-clock">12:00:00</div>
+            <button type="button" class="btn-header-manual" onclick="window.cambiarPestanaPrincipal('tab-documentacion')" title="Manual de usuario, manual tecnico y catalogo muestra">Manuales y Ayuda</button>
+            <button class="btn-header-backup" onclick="window.IMPORT_EXPORT_MODULE.exportarRespaldoJSON()" title="Exportar respaldo instantáneo en 1 Clic (RNF-06)">
+                Respaldo Rápido
+            </button>
+        </div>
+    </header>
+
+    <!-- ================= 2. VIEWPORT PRINCIPAL SPA ================= -->
+    <main class="app-main-viewport">
+
+        <!-- ================= PESTAÑA 1: MOSTRADOR POS ================= -->
+        <section id="tab-pos" class="app-tab-section active">
+            <div class="pos-workspace-grid">
+                
+                <!-- Columna Izquierda: Búsqueda y Catálogo Rápido -->
+                <div class="pos-left-panel">
+                    <div class="pos-search-header-bar">
+                        <div class="search-input-wrapper" id="barcode-search-container">
+                            <span class="search-icon-inside"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+                            <input type="text" id="barcode-search-input" placeholder="Escanear código de barras o teclear nombre/SKU... [F1]" autofocus autocomplete="off">
+                            <div class="search-dropdown" id="search-dropdown-results"></div>
+                        </div>
+                        <button class="btn-fast-service" onclick="window.POS_MODULE.openCopiasModal()" title="Copias b/n, color y enmicados [F4]">
+                            Copias / Impresiones [F4]
+                        </button>
+                        <button class="btn-fast-service" style="background: #0284c7; color: white; border-color: #0284c7;" onclick="window.POS_MODULE.abrirHistorialTickets()" title="Consultar ventas y reimprimir tickets [F8]">
+                            Historial Tickets [F8]
+                        </button>
+                    </div>
+
+                    <div class="pos-quick-catalog-area">
+                        <div class="catalog-section-title">Artículos Rápidos de Mostrador</div>
+                        <div class="quick-products-grid" id="quick-products-grid">
+                            <!-- Inyectado dinámicamente por pos.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Pestañas de 5 Carritos y Ticket Activo -->
+                <div class="pos-right-ticket-panel">
+                    <div class="cart-tabs-bar" id="cart-tabs-container">
+                        <!-- Inyectado dinámicamente por pos.js (5 carritos) -->
+                    </div>
+
+                    <div class="cart-items-scrollable">
+                        <div id="cart-empty-state" class="cart-empty-placeholder">
+                            <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" style="margin-bottom: 6px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
+                            <p><b>Carrito vacío</b></p>
+                            <small>Escanee un producto o elija del catálogo rápido para comenzar.</small>
+                        </div>
+
+                        <div id="cart-table-wrapper" style="display: none;">
+                            <table class="cart-table">
+                                <thead>
+                                    <tr>
+                                        <th>Artículo</th>
+                                        <th class="text-center" style="width: 85px;">Cant.</th>
+                                        <th class="text-right" style="width: 70px;">P.U.</th>
+                                        <th class="text-right" style="width: 75px;">Subtotal</th>
+                                        <th class="text-center" style="width: 35px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-items-tbody">
+                                    <!-- Inyectado dinámicamente por pos.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pie de Cobro y Totales -->
+                    <div class="pos-checkout-footer">
+                        <div class="totals-breakdown">
+                            <div class="totals-row" id="row-discount" style="display: none; color: #d9534f; font-weight: 700;">
+                                <span>Descuento aplicado:</span>
+                                <span id="calc-descuento">-$0.00</span>
+                            </div>
+                            <div class="totals-row">
+                                <span>Subtotal (sin IVA):</span>
+                                <span id="calc-subtotal">$0.00</span>
+                            </div>
+                            <div class="totals-row">
+                                <span>IVA (16% trasl.):</span>
+                                <span id="calc-iva">$0.00</span>
+                            </div>
+                            <div class="totals-row main-total-row">
+                                <span>TOTAL:</span>
+                                <span id="calc-total">$0.00</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-checkout-action" onclick="window.POS_MODULE.openCheckoutModal()">
+                            COBRAR TICKET [F10]
+                        </button>
+
+                        <div class="checkout-aux-actions">
+                            <button class="btn-aux" onclick="window.POS_MODULE.cycleNextCart()">
+                                Alternar Carrito [F2]
+                            </button>
+                            <button class="btn-aux" onclick="window.POS_MODULE.clearActiveCart()">
+                                Limpiar Carrito [Esc]
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= PESTAÑA 2: ALMACÉN E INVENTARIO (Fase 4 Completa) ================= -->
+        <section id="tab-inventario" class="app-tab-section">
+            <div class="inventory-workspace-container">
+                
+                <!-- KPI Bar Superior de Almacén -->
+                <div class="dashboard-kpi-bar">
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Artículos</span>
+                        <span class="kpi-value" id="stat-total-products">0</span>
+                        <span class="kpi-subtext">Catálogo activo</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Valorización Almacén</span>
+                        <span class="kpi-value" id="stat-total-value">$0.00 MXN</span>
+                        <span class="kpi-subtext">Costo adquisición</span>
+                    </div>
+                    <div class="kpi-card alert-kpi">
+                        <span class="kpi-title">Stock Crítico</span>
+                        <span class="kpi-value" id="stat-low-stock-count">0</span>
+                        <span class="kpi-subtext">Alerta de reorden</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Familias / Líneas</span>
+                        <span class="kpi-value" id="stat-total-categories">0</span>
+                        <span class="kpi-subtext">Categorías activas</span>
+                    </div>
+                </div>
+
+                <!-- Barra de Sub-pestañas de Inventario -->
+                <nav class="inventory-subtabs-bar">
+                    <button class="subtab-btn active" data-subtab="subtab-inv-catalogo">Catálogo y Existencias</button>
+                    <button class="subtab-btn" data-subtab="subtab-inv-masters">Marcas y Categorías</button>
+                    <button class="subtab-btn" data-subtab="subtab-inv-entradas">Entradas / Reabastecimiento</button>
+                    <button class="subtab-btn" data-subtab="subtab-inv-mermas">Control de Mermas</button>
+                    <button class="subtab-btn" data-subtab="subtab-inv-kardex">Kardex Auditable</button>
+                    <button class="subtab-btn" data-subtab="subtab-inv-import-export">Carga Masiva y Respaldos</button>
+                </nav>
+
+                <!-- Sub-pestaña 2.1: Catálogo de Productos -->
+                <div id="subtab-inv-catalogo" class="inventory-subtab-pane active">
+                    <div class="inventory-panel-container">
+                        <div class="inventory-toolbar">
+                            <div class="search-filters-group">
+                                <input type="text" id="catalog-search-input" class="input-search-field" placeholder=" Buscar por nombre comercial, código de barras o SKU... [F1]">
+                                <select id="catalog-category-filter" class="select-filter-field">
+                                    <option value="">Todas las Categorías</option>
+                                </select>
+                                <select id="catalog-brand-filter" class="select-filter-field">
+                                    <option value="">Todas las Marcas</option>
+                                </select>
+                                <label class="checkbox-filter-label">
+                                    <input type="checkbox" id="catalog-low-stock-only"> Solo Alerta Stock Crítico
+                                </label>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button id="btn-inv-sincronizar" class="btn-secondary" style="padding: 7px 12px; font-size: 0.8rem; font-weight: 600; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer;" onclick="if(window.recargarCatalogoCompleto160){window.recargarCatalogoCompleto160(true).then(()=>{window.INVENTORY_MODULE.reloadCatalogTable();window.INVENTORY_MODULE.showToast('Catálogo oficial de 160 artículos restablecido','success');});}" title="Sincroniza y asegura los 160 productos base en la base de datos">
+                                    Sincronizar Catálogo (160 Arts.)
+                                </button>
+                                <button id="btn-inv-nuevo-producto" class="btn-primary-action" onclick="window.INVENTORY_MODULE.openProductModal()">
+                                    Nuevo Producto [F2]
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive-box">
+                            <table class="data-table-custom" id="products-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 140px;">Código / SKU</th>
+                                        <th>Artículo / Descripción Técnica</th>
+                                        <th style="width: 140px;">Categoría</th>
+                                        <th style="width: 110px;">Marca</th>
+                                        <th style="width: 100px;" class="text-right th-costo-compra">Costo</th>
+                                        <th style="width: 100px;" class="text-right">Venta</th>
+                                        <th style="width: 130px;" class="text-center">Existencia</th>
+                                        <th style="width: 90px;" class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-table-tbody">
+                                    <!-- Inyección dinámica por inventory.js -->
+                                </tbody>
+                            </table>
+                            <div id="products-empty-state" style="display: none; padding: 40px; text-align: center; color: #64748b;">
+                                <h3>No se encontraron artículos con los criterios seleccionados.</h3>
+                                <p>Intente modificar el término de búsqueda o limpiar los filtros.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-pestaña 2.2: Marcas y Categorías -->
+                <div id="subtab-inv-masters" class="inventory-subtab-pane">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; height: 100%;">
+                        <!-- Panel Marcas -->
+                        <div class="inventory-panel-container">
+                            <div class="inventory-toolbar">
+                                <div>
+                                    <h3 style="color: var(--color-primary); font-size: 0.95rem; font-weight: 800;">Marcas Homologadas (12 Marcas)</h3>
+                                    <p style="font-size: 0.72rem; color: var(--color-slate-light);">Proveedores directos y fabricantes oficiales de Papelería A B C</p>
+                                </div>
+                                <button class="btn-primary-action" onclick="window.MASTERS_MODULE.openMarcaModal()">
+                                    Nueva Marca
+                                </button>
+                            </div>
+                            <div class="table-responsive-box">
+                                <table class="data-table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Marca</th>
+                                            <th>Origen</th>
+                                            <th>Descripción</th>
+                                            <th class="text-center" style="width: 60px;">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="marcas-table-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Panel Categorías -->
+                        <div class="inventory-panel-container">
+                            <div class="inventory-toolbar">
+                                <div>
+                                    <h3 style="color: var(--color-primary); font-size: 0.95rem; font-weight: 800;">Categorías y Familias (8 Categorías)</h3>
+                                    <p style="font-size: 0.72rem; color: var(--color-slate-light);">Agrupación lógica para reportes, catálogo y mostrador POS</p>
+                                </div>
+                                <button class="btn-primary-action" onclick="window.MASTERS_MODULE.openCategoriaModal()">
+                                    Nueva Categoría
+                                </button>
+                            </div>
+                            <div class="table-responsive-box">
+                                <table class="data-table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Categoría</th>
+                                            <th>Alcance y Definición</th>
+                                            <th class="text-center" style="width: 60px;">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="categorias-table-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-pestaña 2.3: Entradas / Reabastecimiento -->
+                <div id="subtab-inv-entradas" class="inventory-subtab-pane">
+                    <div class="form-card-container">
+                        <h2 class="form-header-title">Registro de Entrada de Mercancía / Reabastecimiento</h2>
+                        <p class="form-header-desc">
+                            Ingrese las compras recibidas de proveedores mayoristas para actualizar existencias y asentar el costo contable en el Kardex auditable.
+                        </p>
+
+                        <form id="form-entrada-mercancia" onsubmit="window.MOVEMENTS_MODULE.handleEntradaFormSubmit(event)">
+                            <div class="form-group-field">
+                                <label for="entrada-producto-select">Artículo a Ingresar *</label>
+                                <select id="entrada-producto-select" class="form-control-select" onchange="window.MOVEMENTS_MODULE.onEntradaProductChange()" required>
+                                    <option value="">-- Seleccionar Artículo --</option>
+                                </select>
+                            </div>
+
+                            <div class="form-grid-2col">
+                                <div class="form-group-field">
+                                    <label for="entrada-cantidad">Cantidad Recibida (<span id="entrada-unidad-display">piezas</span>) *</label>
+                                    <input type="number" id="entrada-cantidad" class="form-control-input" step="1" min="1" placeholder="Ej. 50" oninput="window.MOVEMENTS_MODULE.calcularSubtotalEntrada()" required>
+                                </div>
+                                <div class="form-group-field">
+                                    <label for="entrada-costo-unitario">Costo Unitario de Compra ($ MXN) *</label>
+                                    <input type="number" id="entrada-costo-unitario" class="form-control-input" step="0.01" min="0" placeholder="0.00" oninput="window.MOVEMENTS_MODULE.calcularSubtotalEntrada()" required>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2col">
+                                <div class="form-group-field">
+                                    <label for="entrada-proveedor-select">Proveedor Mayorista / Fabricante</label>
+                                    <select id="entrada-proveedor-select" class="form-control-select">
+                                        <option value="">-- Seleccionar Proveedor --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-field">
+                                    <label for="entrada-folio-factura">Folio de Factura / Remisión de Entrega</label>
+                                    <input type="text" id="entrada-folio-factura" class="form-control-input" placeholder="Ej. FAC-2026-9812">
+                                </div>
+                            </div>
+
+                            <div class="subtotal-calc-box">
+                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--color-slate-dark);">Inversión Total de la Entrada:</span>
+                                <span id="entrada-subtotal-display" style="font-size: 1.2rem; font-weight: 800; color: var(--color-emerald);">$0.00 MXN</span>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('form-entrada-mercancia').reset()">Limpiar Formulario</button>
+                                <button type="submit" class="btn-primary-action" style="padding: 9px 20px;">Confirmar y Asentar Entrada en Kardex</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Sub-pestaña 2.4: Control de Mermas y Bajas -->
+                <div id="subtab-inv-mermas" class="inventory-subtab-pane">
+                    <div class="form-card-container">
+                        <h2 class="form-header-title" style="color: var(--color-red);">Registro y Control de Mermas / Bajas de Inventario</h2>
+                        <p class="form-header-desc">
+                            Desincorpore del inventario aquellos artículos defectuosos de origen, mercancía maltratada por manipulación o mermas con justificación obligatoria (RF-04).
+                        </p>
+
+                        <form id="form-merma" onsubmit="window.MOVEMENTS_MODULE.handleMermaFormSubmit(event)">
+                            <div class="form-group-field">
+                                <label for="merma-producto-select">Artículo Dañado / A Desincorporar *</label>
+                                <select id="merma-producto-select" class="form-control-select" onchange="window.MOVEMENTS_MODULE.onMermaProductChange()" required>
+                                    <option value="">-- Seleccionar Artículo --</option>
+                                </select>
+                                <small style="color: var(--color-slate-light); margin-top: 3px; display: block;">
+                                    Stock Actual Disponible para Baja: <strong id="merma-stock-disponible" style="color: var(--color-primary);">0</strong>
+                                </small>
+                            </div>
+
+                            <div class="form-grid-2col">
+                                <div class="form-group-field">
+                                    <label for="merma-cantidad">Cantidad a Desincorporar *</label>
+                                    <input type="number" id="merma-cantidad" class="form-control-input" step="1" min="1" placeholder="Ej. 2" required>
+                                </div>
+                                <div class="form-group-field">
+                                    <label for="merma-motivo-select">Motivo Operativo de la Baja *</label>
+                                    <select id="merma-motivo-select" class="form-control-select" required>
+                                        <option value="">-- Seleccionar Motivo --</option>
+                                        <option value="Daño por manipulación o exhibición">Daño físico / rotura en exhibición</option>
+                                        <option value="Defecto de fábrica o tinta seca">Defecto de fabricación / tinta seca</option>
+                                        <option value="Caducidad de adhesivo / pegamento">Caducidad / deterioro de pegamentos</option>
+                                        <option value="Diferencia en auditoría física">Ajuste por faltante en conteo físico</option>
+                                        <option value="Uso interno operativo de papelería">Consumo interno administrativo de la tienda</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group-field">
+                                <label for="merma-justificacion">Justificación y Evidencia del Incidente *</label>
+                                <textarea id="merma-justificacion" class="form-control-textarea" rows="2" placeholder="Detalle las causas del daño..." required></textarea>
+                            </div>
+
+                            <div class="form-group-field">
+                                <label for="merma-responsable">Responsable de Autorización *</label>
+                                <input type="text" id="merma-responsable" class="form-control-input" value="Gerardo Cabrera Morales (Líder Técnico & Almacén)" required>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('form-merma').reset()">Cancelar</button>
+                                <button type="submit" class="btn-primary-action" style="background: var(--color-red); padding: 9px 20px;">Asentar Merma en Kardex</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Sub-pestaña 2.5: Kardex Auditable -->
+                <div id="subtab-inv-kardex" class="inventory-subtab-pane">
+                    <div class="inventory-panel-container">
+                        <div class="inventory-toolbar">
+                            <div>
+                                <h3 style="color: var(--color-primary); font-size: 0.95rem; font-weight: 800;">Kardex y Libro Mayor de Movimientos</h3>
+                                <p style="font-size: 0.72rem; color: var(--color-slate-light);">Auditoría inmutable de todas las transacciones: compras, ventas mostrador, mermas y ajustes (RF-07)</p>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <select id="kardex-producto-filter" class="select-filter-field" style="max-width: 240px;">
+                                    <option value="">Todos los Productos</option>
+                                </select>
+                                <select id="kardex-tipo-filter" class="select-filter-field">
+                                    <option value="">Todos los Tipos</option>
+                                    <option value="VENTA_MOSTRADOR">Venta Mostrador</option>
+                                    <option value="ENTRADA_COMPRA">Entrada por Compra</option>
+                                    <option value="MERMA_BAJA">Merma / Baja</option>
+                                    <option value="INVENTARIO_INICIAL">Inventario Inicial</option>
+                                </select>
+                                <button class="btn-secondary" onclick="window.MOVEMENTS_MODULE.reloadKardexTable()">Actualizar</button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive-box">
+                            <table class="data-table-custom">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 130px;">Fecha y Hora</th>
+                                        <th>Artículo</th>
+                                        <th style="width: 130px;">Tipo Transacción</th>
+                                        <th style="width: 80px;" class="text-center">Cantidad</th>
+                                        <th style="width: 80px;" class="text-center">Stock Previo</th>
+                                        <th style="width: 90px;" class="text-center">Stock Resultante</th>
+                                        <th>Referencia / Comprobante</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kardex-full-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-pestaña 2.6: Carga Masiva y Respaldos -->
+                <div id="subtab-inv-import-export" class="inventory-subtab-pane">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1000px; margin: 0 auto; width: 100%;">
+                        <!-- Tarjeta CSV -->
+                        <div class="inventory-panel-container">
+                            <h3 class="form-header-title">Intercambio de Catálogo en CSV / Excel</h3>
+                            <p class="form-header-desc">
+                                Descargue el catálogo de Papelería A B C con compatibilidad total para Microsoft Excel (UTF-8 BOM) o cargue por lote cientos de nuevos artículos.
+                            </p>
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                                <button class="btn-primary-action" style="justify-content: center; padding: 10px;" onclick="window.IMPORT_EXPORT_MODULE.exportarCatalogoCSV()">
+                                    Exportar Catálogo Actual (.CSV)
+                                </button>
+                                <button class="btn-secondary" style="padding: 8px;" onclick="window.IMPORT_EXPORT_MODULE.descargarPlantillaCSV()">
+                                    Descargar Plantilla Modelo (.CSV)
+                                </button>
+                                <button class="btn-secondary" style="padding: 8px;" onclick="window.POS_MODULE.exportarVentasDiaCSV()">
+                                    Exportar Ventas del Día (.CSV)
+                                </button>
+                                <hr style="border: none; border-top: 1px solid var(--color-border-subtle); margin: 4px 0;">
+                                <div class="form-group-field">
+                                    <label for="input-csv-file">Subir Archivo CSV con Nuevos Productos:</label>
+                                    <input type="file" id="input-csv-file" accept=".csv" class="form-control-input" onchange="window.IMPORT_EXPORT_MODULE.handleCSVFileInput(event)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta Respaldo Snapshot JSON -->
+                        <div class="inventory-panel-container">
+                            <h3 class="form-header-title">Respaldo y Recuperación Local (RNF-06)</h3>
+                            <p class="form-header-desc">
+                                Copia de seguridad snapshot de la base de datos IndexedDB completa (13 Object Stores: productos, ventas, turnos, marcas, mermas y kardex).
+                            </p>
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px; font-size: 0.78rem; color: #1e40af;">
+                                    <b>Tolerancia a Fallos Offline:</b> La persistencia reside localmente en el motor IndexedDB de su navegador web.
+                                </div>
+                                <button class="btn-primary-action" style="background: var(--color-primary); justify-content: center; padding: 12px;" onclick="window.IMPORT_EXPORT_MODULE.exportarRespaldoJSON()">
+                                    Generar Respaldo Total Snapshot (.JSON)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta SQL / SQLite 3 Oficial -->
+                        <div class="inventory-panel-container" style="grid-column: span 2; margin-top: 6px;">
+                            <h3 class="form-header-title">Base de Datos Relacional SQL (SQLite 3 Oficial)</h3>
+                            <p class="form-header-desc">
+                                Base de datos relacional normalizada en Tercera Forma Normal (3FN). Aloja los 160 artículos reales, 8 categorías, 12 marcas, Kardex inmutable y control de turnos. Compatible con SQLiteStudio, DBeaver, Python y navegadores web.
+                            </p>
+                            <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                                <button class="btn-primary-action" style="background: #0f766e; padding: 9px 16px;" onclick="window.POS_DB.exportarSQL()">
+                                    Descargar Script SQL Completo (.SQL)
+                                </button>
+                                <button type="button" class="btn-secondary" style="padding: 9px 16px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; background: #ffffff; border: 1px solid var(--color-border); border-radius: 6px;" onclick="window.DOCUMENTATION_MODULE.solicitarDescargaBD()" title="Descargar Archivo SQLite 3 (Requiere autorización de Administrador)">
+                                    Descargar Archivo SQLite 3 (.DB)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PESTAÑA 3: CONTROL DE CAJA ================= -->
+        <section id="tab-caja" class="app-tab-section">
+            <div class="cash-workspace-container">
+                <div style="max-width: 960px; margin: 0 auto; width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <h2 style="font-size: 1.2rem; color: var(--color-primary); margin-bottom: 2px;">Control de Turnos, Arqueo y Balance de Caja (RF-08)</h2>
+                            <p style="font-size: 0.78rem; color: var(--color-slate-light); margin: 0;">Gestión de flujo de efectivo, cuadratura rápida y auditoría Z en Papelería A B C</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn-primary-action" style="padding: 7px 12px; font-size: 0.8rem;" onclick="window.POS_MODULE.exportarVentasDiaCSV()" title="Exportar reporte de ventas del día en formato CSV">
+                                Exportar Ventas del Día (.CSV)
+                            </button>
+                            <button type="button" class="btn-secondary" style="background: #ffffff; border: 1px solid var(--color-border); font-size: 0.8rem; font-weight: 600; padding: 7px 12px;" onclick="window.CASH_MODULE.abrirModalMovimiento('ENTRADA')">
+                                Entrada Efectivo
+                            </button>
+                            <button type="button" class="btn-secondary" style="background: #ffffff; border: 1px solid var(--color-border); font-size: 0.8rem; font-weight: 600; padding: 7px 12px;" onclick="window.CASH_MODULE.abrirModalMovimiento('RETIRO')">
+                                Retiro Efectivo
+                            </button>
+                            <button type="button" id="btn-devolucion-cambio" class="btn-primary-action" style="background: #0284c7; padding: 7px 12px; font-size: 0.8rem; font-weight: 700;" onclick="window.CASH_MODULE.abrirModalDevolucionCambio()" title="Gestionar devolución de efectivo o cambio de mercancía (Exclusivo Supervisor y Admin)">
+                                Devolución / Cambio
+                            </button>
+                            <button type="button" id="btn-reabrir-turno" class="btn-primary-action" style="display: none; padding: 7px 14px; font-size: 0.8rem;" onclick="window.CASH_MODULE.reabrirTurno()">
+                                Abrir Nuevo Turno
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- KPI Cards de Caja -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px;">
+                        <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px;">
+                            <small style="color: var(--color-slate-light); font-weight: bold; font-size: 0.68rem;">ESTADO DEL TURNO</small>
+                            <div id="cash-shift-status" style="font-size: 1.05rem; font-weight: 800; color: var(--color-emerald); margin-top: 2px;">TURNO ABIERTO</div>
+                            <small style="color: var(--color-slate-light); font-size: 0.72rem;">Cajero: <span id="cash-cashier-name">Gerardo Cabrera</span></small>
+                        </div>
+                        <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px;">
+                            <small style="color: var(--color-slate-light); font-weight: bold; font-size: 0.68rem;">FONDO INICIAL APERTURA</small>
+                            <div id="cash-initial-fund" style="font-size: 1.05rem; font-weight: 800; color: var(--color-primary); margin-top: 2px;">$500.00</div>
+                            <small style="color: var(--color-slate-light); font-size: 0.72rem;">Apertura: <span id="cash-open-date">Hoy</span></small>
+                        </div>
+                        <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px;">
+                            <small style="color: var(--color-slate-light); font-weight: bold; font-size: 0.68rem;">VENTAS EN EFECTIVO</small>
+                            <div id="cash-sales-cash" style="font-size: 1.05rem; font-weight: 800; color: var(--color-emerald); margin-top: 2px;">$0.00</div>
+                            <small style="color: var(--color-slate-light); font-size: 0.72rem;">Tarjetas: <span id="cash-sales-card">$0.00</span> | SPEI: <span id="cash-sales-spei">$0.00</span></small>
+                        </div>
+                        <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px;">
+                            <small style="color: var(--color-slate-light); font-weight: bold; font-size: 0.68rem;">MOVIMIENTOS MANUALES</small>
+                            <div style="font-size: 0.95rem; font-weight: 800; margin-top: 2px;">
+                                <span id="cash-manual-entries" style="color: var(--color-emerald);">+$0.00</span> / 
+                                <span id="cash-manual-withdrawals" style="color: #d9534f;">-$0.00</span>
+                            </div>
+                            <small style="color: var(--color-slate-light); font-size: 0.72rem;">Entradas y Retiros</small>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Cierre y Cuadratura Rápida de Turno (Alta Eficiencia) -->
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 10px; padding: 22px; max-width: 720px; margin: 0 auto; box-shadow: var(--shadow-sm);">
+                        <div style="border-bottom: 1px solid var(--color-border-subtle); padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <h3 style="font-size: 1.05rem; color: var(--color-primary); margin-bottom: 2px;">Cierre y Cuadratura Rápida de Turno</h3>
+                                <p style="font-size: 0.76rem; color: var(--color-slate-light); margin: 0;">Conciliación directa de efectivo para agilizar el corte sin conteo desglosado por piezas.</p>
+                            </div>
+                            <button type="button" id="btn-cuadre-exacto" class="btn-secondary" style="font-size: 0.78rem; padding: 6px 14px; font-weight: 600;" onclick="window.CASH_MODULE.copiarMontoEsperado()" title="Copia el monto esperado para un cuadre exacto en 1 clic">
+                                Cuadre Exacto
+                            </button>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 0.95rem; padding: 12px 16px; background: #f8fafc; border: 1px solid var(--color-border-subtle); border-radius: 8px;">
+                            <span style="font-weight: 600; color: var(--color-slate-dark);">Efectivo Total Esperado en Cajón:</span>
+                            <b id="cash-expected-drawer" style="font-size: 1.35rem; color: var(--color-primary);">$500.00</b>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label for="input-arqueo-contado" style="display: block; font-size: 0.84rem; font-weight: 700; color: var(--color-slate-dark); margin-bottom: 6px;">
+                                Total de Efectivo Físico Contado ($ MXN):
+                            </label>
+                            <input type="number" id="input-arqueo-contado" step="0.50" placeholder="0.00" 
+                                style="width: 100%; padding: 10px 14px; border: 2px solid var(--color-border); border-radius: 8px; font-size: 1.25rem; font-weight: 800; color: var(--color-primary); outline: none; background: #ffffff;" 
+                                oninput="window.CASH_MODULE.calcularArqueoCierre()"
+                                onkeydown="if(event.key==='Enter'){event.preventDefault();window.CASH_MODULE.cerrarTurnoCaja();}">
+                            <small style="color: var(--color-slate-light); font-size: 0.74rem; display: block; margin-top: 4px;">Ingrese el total de efectivo contado en cajón o use "Cuadre Exacto". Presione Enter para emitir corte.</small>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 0.92rem; padding: 12px 16px; border: 1px dashed var(--color-border); border-radius: 8px; background: #ffffff;">
+                            <span style="font-weight: 600;">Diferencia de Cuadre:</span>
+                            <b id="arqueo-diferencia-display" style="font-size: 1.05rem; color: var(--color-slate-light);">$0.00</b>
+                        </div>
+
+                        <div id="aviso-corte-cajero" style="display: none; background: #fef2f2; border: 1px solid #f87171; color: #991b1b; padding: 12px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-align: center; margin-bottom: 12px;">
+                            Acceso Restringido: Los cajeros no tienen privilegios para realizar cortes de caja. El corte de caja y cierre de turno Z solo puede ser ejecutado por el perfil SUPERVISOR.
+                        </div>
+
+                        <button type="button" id="btn-ejecutar-corte-z" class="btn-checkout-action" style="background: var(--color-primary); padding: 12px; font-size: 0.95rem;" onclick="window.CASH_MODULE.cerrarTurnoCaja()">
+                            Confirmar Cierre de Turno y Emitir Corte Z
+                        </button>
+                    </div>
+
+                    <!-- Panel de Auditoría: Registro de Devoluciones y Cambios de Mercancía (RF-08 / RBAC) -->
+                    <div id="panel-devoluciones-caja" style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 10px; padding: 20px; max-width: 960px; margin: 24px auto 0 auto; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--color-border-subtle); padding-bottom: 12px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <h3 style="font-size: 1.05rem; color: var(--color-primary); margin: 0;">Auditoría de Devoluciones y Cambios de Mercancía</h3>
+                                    <span class="role-badge role-badge-supervisor" style="font-size: 0.65rem;">SUPERVISOR / ADMIN</span>
+                                </div>
+                                <p style="font-size: 0.76rem; color: var(--color-slate-light); margin: 3px 0 0 0;">Historial inmutable de cancelaciones, canjes y reembolsos de caja con impacto directo en inventario y kardex.</p>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <input type="text" id="filtro-devoluciones-busqueda" placeholder="Buscar folio, producto o ticket..." class="form-control-input" style="font-size: 0.78rem; padding: 5px 10px; width: 220px;" oninput="window.CASH_MODULE.renderTablaDevoluciones()">
+                                <select id="filtro-devoluciones-tipo" class="form-control-select" style="font-size: 0.78rem; padding: 5px 10px; width: 140px;" onchange="window.CASH_MODULE.renderTablaDevoluciones()">
+                                    <option value="TODOS">Todos los Tipos</option>
+                                    <option value="DEVOLUCION">Devoluciones</option>
+                                    <option value="CAMBIO">Cambios</option>
+                                </select>
+                                <button type="button" class="btn-secondary" style="font-size: 0.76rem; padding: 5px 10px; font-weight: 600; background: #ffffff;" onclick="window.CASH_MODULE.exportarDevolucionesCSV()" title="Exportar historial consolidado a archivo CSV Excel">Exportar CSV</button>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de Auditoría de Devoluciones y Cambios -->
+                        <div class="table-responsive-box" style="max-height: 320px; overflow-y: auto; border: 1px solid var(--color-border-subtle); border-radius: 6px;">
+                            <table class="inventory-data-table" style="font-size: 0.78rem; width: 100%; margin: 0;">
+                                <thead>
+                                    <tr style="position: sticky; top: 0; background: #f8fafc; z-index: 2;">
+                                        <th>Folio</th>
+                                        <th>Fecha y Hora</th>
+                                        <th>Operación</th>
+                                        <th>Ticket Origen</th>
+                                        <th>Producto Devuelto</th>
+                                        <th>Producto Nuevo (Canje)</th>
+                                        <th class="text-right">Efecto en Caja</th>
+                                        <th>Motivo / Razón</th>
+                                        <th>Autorizado Por</th>
+                                        <th class="text-center" style="width: 85px;">Comprobante</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-devoluciones-tbody">
+                                    <!-- Inyectado por cash.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <!-- ================= PESTAÑA 4: REPORTES Y ANALÍTICA (FASE 6 - SPRINT 3) ================= -->
+        <section id="tab-reportes" class="app-tab-section">
+            <div class="reports-workspace-container">
+                
+                <!-- Encabezado del Módulo de Reportes -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <h2 style="font-size: 1.25rem; color: var(--color-primary); margin-bottom: 2px;">Centro Ejecutivo de Reportes y Analítica Comercial (RF-06 / RF-07)</h2>
+                        <p style="font-size: 0.78rem; color: var(--color-slate-light); margin: 0;">Papelería A B C — Filtros por fecha, balance diario consolidado, ranking de productos más vendidos y exportación CSV.</p>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn-primary-action" style="padding: 7px 14px; font-size: 0.78rem; background: #b91c1c; color: #ffffff; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(185,28,28,0.3);" onclick="window.REPORTS_MODULE.abrirModalReportePDF()" title="Crear y exportar Reporte Ejecutivo Oficial en PDF (Ventas Semana/Mes/Año, Cajeros y Auditoría de Usuarios)">
+                            Crear Reporte PDF (.PDF)
+                        </button>
+                        <button type="button" class="btn-primary-action" style="padding: 7px 12px; font-size: 0.78rem;" onclick="window.REPORTS_MODULE.exportarBalanceCSV()" title="Exportar consolidado de balance diario a CSV Excel">
+                            Exportar Balance (.CSV)
+                        </button>
+                        <button type="button" class="btn-secondary" style="background: #ffffff; border: 1px solid var(--color-border); font-size: 0.78rem; font-weight: 600; padding: 7px 12px;" onclick="window.REPORTS_MODULE.exportarTopProductosCSV()" title="Exportar ranking de artículos más vendidos a CSV Excel">
+                            Exportar Top Productos (.CSV)
+                        </button>
+                        <button type="button" class="btn-secondary" style="background: #ffffff; border: 1px solid var(--color-border); font-size: 0.78rem; font-weight: 600; padding: 7px 12px;" onclick="window.REPORTS_MODULE.exportarVentasCategoriaCSV()" title="Exportar ventas por familia comercial a CSV Excel">
+                            Exportar Por Categoría (.CSV)
+                        </button>
+                        <button type="button" class="btn-secondary" style="background: #ffffff; border: 1px solid var(--color-border); font-size: 0.78rem; font-weight: 600; padding: 7px 12px;" onclick="window.REPORTS_MODULE.exportarTransaccionesDetalladasCSV()" title="Exportar todas las transacciones individuales filtradas">
+                            Exportar Detalle (.CSV)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Barra de Filtros Multicriterio Dinámicos -->
+                <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                        <span style="font-size: 0.78rem; font-weight: 700; color: var(--color-slate-dark); margin-right: 4px;">Periodo:</span>
+                        <button type="button" class="btn-periodo-rapido" data-periodo="HOY" onclick="window.REPORTS_MODULE.setFiltroPeriodo('HOY')">Hoy</button>
+                        <button type="button" class="btn-periodo-rapido" data-periodo="AYER" onclick="window.REPORTS_MODULE.setFiltroPeriodo('AYER')">Ayer</button>
+                        <button type="button" class="btn-periodo-rapido active" data-periodo="7DIAS" onclick="window.REPORTS_MODULE.setFiltroPeriodo('7DIAS')">Últimos 7 Días</button>
+                        <button type="button" class="btn-periodo-rapido" data-periodo="MES" onclick="window.REPORTS_MODULE.setFiltroPeriodo('MES')">Mes Actual</button>
+                        <button type="button" class="btn-periodo-rapido" data-periodo="TODO" onclick="window.REPORTS_MODULE.setFiltroPeriodo('TODO')">Todo el Historial</button>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <small style="font-size: 0.74rem; font-weight: 600; color: var(--color-slate-light);">Desde:</small>
+                            <input type="date" id="report-fecha-inicio" class="form-control-input" style="padding: 4px 8px; font-size: 0.8rem; width: 130px;" onchange="window.REPORTS_MODULE.handleCustomDateChange()">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <small style="font-size: 0.74rem; font-weight: 600; color: var(--color-slate-light);">Hasta:</small>
+                            <input type="date" id="report-fecha-fin" class="form-control-input" style="padding: 4px 8px; font-size: 0.8rem; width: 130px;" onchange="window.REPORTS_MODULE.handleCustomDateChange()">
+                        </div>
+                        <select id="report-filtro-categoria" class="form-control-select" style="padding: 5px 8px; font-size: 0.8rem; width: 170px;" onchange="window.REPORTS_MODULE.handleFiltrosAdicionalesChange()">
+                            <option value="TODAS">Todas las Categorías</option>
+                        </select>
+                        <select id="report-filtro-metodo" class="form-control-select" style="padding: 5px 8px; font-size: 0.8rem; width: 140px;" onchange="window.REPORTS_MODULE.handleFiltrosAdicionalesChange()">
+                            <option value="TODOS">Todos los Métodos</option>
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="TARJETA">Tarjeta</option>
+                            <option value="TRANSFERENCIA">Transferencia SPEI</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- KPI Strip Analítico (6 tarjetas ejecutivas) -->
+                <div class="reports-kpi-grid">
+                    <div class="reports-kpi-card">
+                        <small style="color: var(--color-slate-light); font-weight: bold; font-size: 0.65rem; text-transform: uppercase;">VENTAS NETAS</small>
+                        <div id="kpi-ventas-totales" style="font-size: 1.15rem; font-weight: 800; color: var(--color-emerald); margin-top: 2px;">$0.00</div>
+                        <small id="kpi-transacciones" style="color: var(--color-slate-light); font-size: 0.7rem;">0 ventas (0 pzas)</small>
+                    </div>
+                    <div class="reports-kpi-card">
+                        <small style="color: var(--color-slate-light); font-weight: bold; font-size: 0.65rem; text-transform: uppercase;">UTILIDAD BRUTA</small>
+                        <div id="kpi-utilidad-bruta" style="font-size: 1.15rem; font-weight: 800; color: #0284c7; margin-top: 2px;">$0.00</div>
+                        <small id="kpi-margen-pct" style="color: var(--color-slate-light); font-size: 0.7rem;">Margen: 0.0%</small>
+                    </div>
+                    <div class="reports-kpi-card">
+                        <small style="color: var(--color-slate-light); font-weight: bold; font-size: 0.65rem; text-transform: uppercase;">TICKET PROMEDIO</small>
+                        <div id="kpi-ticket-promedio" style="font-size: 1.15rem; font-weight: 800; color: var(--color-primary); margin-top: 2px;">$0.00</div>
+                        <small style="color: var(--color-slate-light); font-size: 0.7rem;">Promedio por compra</small>
+                    </div>
+                    <div class="reports-kpi-card kpi-span-3">
+                        <small style="color: var(--color-slate-light); font-weight: bold; font-size: 0.65rem; text-transform: uppercase;">MEZCLA DE MÉTODOS DE PAGO</small>
+                        <div id="kpi-mezcla-pagos" style="font-size: 0.88rem; font-weight: 700; margin-top: 4px; line-height: 1.4;">
+                            <span style="color: var(--color-emerald);">Efvo: $0.00</span> | 
+                            <span style="color: #0284c7;">Tarj: $0.00</span> | 
+                            <span style="color: #7c3aed;">SPEI: $0.00</span>
+                        </div>
+                        <small style="color: var(--color-slate-light); font-size: 0.7rem;">Distribución de ingresos por canal comercial</small>
+                    </div>
+                </div>
+
+                <!-- Panel Dividido: Balance Diario (Izquierda) y Top Productos (Derecha) -->
+                <div class="reports-grid-2col">
+                    
+                    <!-- Reporte 1: Balance Diario Consolidado -->
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 16px; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="font-size: 0.95rem; color: var(--color-primary); margin: 0;">Balance Diario y Flujo Financiero</h3>
+                            <small style="font-size: 0.74rem; color: var(--color-slate-light);">Ventas por día y método</small>
+                        </div>
+                        <div class="reports-table-scroll-box">
+                            <table class="inventory-data-table" style="font-size: 0.78rem; width: 100%;">
+                                <thead>
+                                    <tr style="position: sticky; top: 0; background: #f1f5f9; z-index: 2;">
+                                        <th>Fecha</th>
+                                        <th class="text-center">Ops</th>
+                                        <th class="text-right">Bruto</th>
+                                        <th class="text-right">Desc.</th>
+                                        <th class="text-right">Neto</th>
+                                        <th class="text-right">Utilidad</th>
+                                        <th>Métodos</th>
+                                        <th style="width: 80px;">Tendencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-balance-diario-tbody">
+                                    <!-- Inyectado por reports.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Reporte 2: Ranking de Productos Más Vendidos -->
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 16px; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="font-size: 0.95rem; color: var(--color-primary); margin: 0;">Top 15 Productos Más Vendidos</h3>
+                            <small style="font-size: 0.74rem; color: var(--color-slate-light);">Ranking por piezas y rentabilidad</small>
+                        </div>
+                        <div class="reports-table-scroll-box">
+                            <table class="inventory-data-table" style="font-size: 0.78rem; width: 100%;">
+                                <thead>
+                                    <tr style="position: sticky; top: 0; background: #f1f5f9; z-index: 2;">
+                                        <th class="text-center" style="width: 35px;">#</th>
+                                        <th>Producto</th>
+                                        <th class="text-center">Cant.</th>
+                                        <th class="text-right">Total ($)</th>
+                                        <th class="text-right">Costo</th>
+                                        <th class="text-right">Utilidad</th>
+                                        <th>Participación</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-top-productos-tbody">
+                                    <!-- Inyectado por reports.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Panel Dividido: Ventas por Categoría (Izquierda) y Transacciones (Derecha) -->
+                <div class="reports-grid-2col-alt">
+                    
+                    <!-- Reporte 3: Ventas por Categoría Comercial -->
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 16px; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="font-size: 0.95rem; color: var(--color-primary); margin: 0;">Ventas Consolidadas por Categoría</h3>
+                            <small style="font-size: 0.74rem; color: var(--color-slate-light);">Familias comerciales</small>
+                        </div>
+                        <div class="reports-table-scroll-box compact">
+                            <table class="inventory-data-table" style="font-size: 0.78rem; width: 100%;">
+                                <thead>
+                                    <tr style="position: sticky; top: 0; background: #f1f5f9; z-index: 2;">
+                                        <th>Familia Comercial</th>
+                                        <th class="text-center">Unidades</th>
+                                        <th class="text-right">Total Facturado</th>
+                                        <th>% de Ventas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-ventas-categoria-tbody">
+                                    <!-- Inyectado por reports.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Reporte 4: Registro Detallado de Transacciones -->
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 16px; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="font-size: 0.95rem; color: var(--color-primary); margin: 0;">Transacciones Detalladas del Periodo</h3>
+                            <small style="font-size: 0.74rem; color: var(--color-slate-light);">Auditoría de tickets emitidos</small>
+                        </div>
+                        <div class="reports-table-scroll-box compact">
+                            <table class="inventory-data-table" style="font-size: 0.78rem; width: 100%;">
+                                <thead>
+                                    <tr style="position: sticky; top: 0; background: #f1f5f9; z-index: 2;">
+                                        <th>Folio</th>
+                                        <th>Fecha</th>
+                                        <th>Cajero</th>
+                                        <th>Pago</th>
+                                        <th>Artículos</th>
+                                        <th class="text-right">Total</th>
+                                        <th class="text-center">Ticket</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-transacciones-tbody">
+                                    <!-- Inyectado por reports.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= PESTAÑA 4: CONFIGURACIÓN ================= -->
+        <section id="tab-configuracion" class="app-tab-section">
+            <div class="cash-workspace-container">
+                <div style="max-width: 900px; margin: 0 auto; width: 100%;">
+                    
+                    <!-- Sección Principal: Administración de Perfiles y Contraseñas (Exclusivo Administrador) -->
+                    <div id="sec-admin-usuarios" style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 10px; padding: 22px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--color-border-subtle); padding-bottom: 14px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <span class="role-badge role-badge-administrador">[PANEL ADMINISTRADOR]</span>
+                                    <h2 style="font-size: 1.15rem; color: var(--color-primary); margin: 0;">Administración de Perfiles y Contraseñas</h2>
+                                </div>
+                                <p style="font-size: 0.78rem; color: var(--color-slate-light); margin: 0;">
+                                    Gestión centralizada de cuentas de usuario, asignación estricta de privilegios y cambio seguro de contraseñas con cifrado SHA-256 + salt criptográfica.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-primary-action" style="font-size: 0.8rem; padding: 8px 14px;" onclick="window.AUTH_MODULE.abrirModalNuevoUsuario()">
+                                + Nuevo Perfil de Usuario
+                            </button>
+                        </div>
+
+                        <!-- Tarjetas informativas de los 3 perfiles oficiales -->
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px;">
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                    <b style="font-size: 0.82rem; color: var(--color-primary);">Administrador</b>
+                                    <span class="role-badge role-badge-administrador">[ADMIN]</span>
+                                </div>
+                                <small style="font-size: 0.72rem; color: var(--color-slate-light); display: block; line-height: 1.3;">
+                                    Destinado a la administración de perfiles, usuarios y contraseñas. Control maestro institucional.
+                                </small>
+                            </div>
+
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                    <b style="font-size: 0.82rem; color: #7c3aed;">Supervisor</b>
+                                    <span class="role-badge role-badge-supervisor">[SUPERVISOR]</span>
+                                </div>
+                                <small style="font-size: 0.72rem; color: var(--color-slate-light); display: block; line-height: 1.3;">
+                                    Altas de productos, categorías y marcas en catálogo, realización de cortes de caja Z y reportes.
+                                </small>
+                            </div>
+
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                    <b style="font-size: 0.82rem; color: #166534;">Usuario (Cajero)</b>
+                                    <span class="role-badge role-badge-usuario">[USUARIO]</span>
+                                </div>
+                                <small style="font-size: 0.72rem; color: var(--color-slate-light); display: block; line-height: 1.3;">
+                                    Operación en mostrador POS y cobro de tickets. Restringido: no puede dar altas ni hacer cortes.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de Perfiles Registrados -->
+                        <div style="overflow-x: auto;">
+                            <table class="inventory-data-table" style="font-size: 0.8rem; width: 100%;">
+                                <thead>
+                                    <tr style="background: #f1f5f9;">
+                                        <th>Usuario (Login)</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Perfil Asignado</th>
+                                        <th>Estado</th>
+                                        <th>Último Acceso</th>
+                                        <th class="text-center" style="width: 150px;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-usuarios-tbody">
+                                    <!-- Inyectado dinámicamente por auth.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 18px; margin-bottom: 16px;">
+                        <h3 style="font-size: 0.95rem; color: var(--color-primary); margin-bottom: 10px;">Datos Institucionales del Negocio</h3>
+                        <table style="width: 100%; font-size: 0.84rem; border-collapse: collapse;">
+                            <tr><td style="padding: 6px 0; color: var(--color-slate-light); width: 180px;">Nombre Comercial:</td><td><b>Papelería A B C</b></td></tr>
+                            <tr><td style="padding: 6px 0; color: var(--color-slate-light);">RFC:</td><td><code>PABC261005ABC</code></td></tr>
+                            <tr><td style="padding: 6px 0; color: var(--color-slate-light);">Dirección:</td><td>Av. Tecnológico #120, Col. Centro, Querétaro</td></tr>
+                            <tr><td style="padding: 6px 0; color: var(--color-slate-light);">Teléfono:</td><td>442-123-4567</td></tr>
+                            <tr><td style="padding: 6px 0; color: var(--color-slate-light);">Leyenda en Ticket:</td><td>¡Gracias por su compra en Papelería A B C!</td></tr>
+                        </table>
+                    </div>
+
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 18px;">
+                        <h3 style="font-size: 0.95rem; color: var(--color-primary); margin-bottom: 6px;">Persistencia Local Offline (IndexedDB)</h3>
+                        <p style="font-size: 0.8rem; color: var(--color-slate-light); margin-bottom: 12px;">
+                            Base de datos: <code>PapeleriaABC_POS_DB</code> (Versión 2). Operación 100% offline sin servidores externos (RNF-02) con latencia de respuesta &lt; 10ms (RNF-01).
+                        </p>
+                        <button class="btn-fast-service" onclick="window.IMPORT_EXPORT_MODULE.exportarRespaldoJSON()">
+                            Generar Respaldo Completo en 1-Clic
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= 8. SECCION: DOCUMENTACION Y MANUALES (FASE 8) ================= -->
+        <section id="tab-documentacion" class="app-tab-section">
+            <div class="doc-workspace-container">
+                <!-- Banner Superior Oficial -->
+                <div class="doc-header-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                                <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0;">Centro Oficial de Documentacion y Manuales</h2>
+                                <span class="role-badge-administrador" style="font-size: 0.72rem; padding: 2px 8px;">Fase 8 Contractual</span>
+                            </div>
+                            <p style="color: #64748b; font-size: 0.85rem; margin: 0; max-width: 850px; line-height: 1.45;">
+                                Documentacion oficial del sistema POS Papeleria A B C: Manual de Usuario ilustrado paso a paso con capturas reales para todos los roles (Administrador, Supervisor y Cajero), Manual Tecnico de arquitectura en 4 capas, scripts SQL DDL normalizados en 3FN y catalogo muestra realista de 160 productos clasificados.
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="MANUAL_DE_USUARIO.pdf" target="_blank" download class="btn-header-backup" style="background: #0284c7; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;" title="Descargar Manual de Usuario Oficial Independiente (PDF)">
+                                Manual de Usuario (PDF)
+                            </a>
+                            <a href="MANUAL_DE_INSTALACION.pdf" target="_blank" download class="btn-header-backup" style="background: #0f766e; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;" title="Descargar Manual de Instalacion y Despliegue Independiente (PDF)">
+                                Manual de Instalacion (PDF)
+                            </a>
+                            <button type="button" class="btn-secondary" style="font-size: 0.78rem; padding: 6px 14px; font-weight: 700; border-radius: 6px; background: #ffffff; border: 1px solid var(--color-border); cursor: pointer;" onclick="window.DOCUMENTATION_MODULE.solicitarDescargaBD()" title="Descargar archivo SQLite nativo con 160 productos (Requiere autorización de Administrador)">
+                                Descargar BD SQLite (.db)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--color-border-subtle); font-size: 0.78rem; color: #475569;">
+                        <span><strong>Estado:</strong> 100% Validado</span>
+                        <span><strong>Version:</strong> 8.0.0 (Semana 8)</span>
+                        <span><strong>Catalogo:</strong> 160 Productos en 3FN</span>
+                        <span><strong>Perfiles:</strong> Administrador, Supervisor, Usuario</span>
+                        <span><strong>Persistencia:</strong> SQLite 3 WASM + LocalStorage</span>
+                        <span><strong>Politica:</strong> Cero Emojis Estricta</span>
+                    </div>
+                </div>
+
+                <!-- Navegacion Sub-Pestanas -->
+                <div class="doc-subtabs-nav">
+                    <button type="button" class="doc-subtab-btn active" data-doc-subtab="doc-subtab-manual">
+                        Manual de Usuario Ilustrado (10 Pasos)
+                    </button>
+                    <button type="button" class="doc-subtab-btn" data-doc-subtab="doc-subtab-tecnico">
+                        Manual Tecnico y Arquitectura SQL
+                    </button>
+                    <button type="button" class="doc-subtab-btn" data-doc-subtab="doc-subtab-catalogo">
+                        Catalogo Muestra (160 Articulos)
+                    </button>
+                </div>
+
+                <!-- SUB-PANE 1: MANUAL DE USUARIO ILUSTRADO -->
+                <div id="doc-subtab-manual" class="doc-subtab-pane active">
+                    
+                    <!-- Resumen de Atajos y Matriz de Roles -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                        <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 14px;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 0.88rem; font-weight: 700; color: #0f172a;">Atajos Rapidos de Teclado</h4>
+                            <div style="font-size: 0.78rem; color: #334155; display: grid; grid-template-columns: 80px 1fr; gap: 6px;">
+                                <code>F1</code><span>Manual de Usuario y Documentacion</span>
+                                <code>F2</code><span>Alta Rapida de Producto (Supervisor/Admin)</span>
+                                <code>F3</code><span>Aplicar Descuento al Carrito POS</span>
+                                <code>F4</code><span>Proceder al Cobro en Efectivo</span>
+                                <code>ESC</code><span>Cerrar Ventanas Modales / Cancelar</span>
+                            </div>
+                        </div>
+
+                        <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 14px;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 0.88rem; font-weight: 700; color: #0f172a;">Matriz de Permisos por Perfil (RBAC)</h4>
+                            <div style="font-size: 0.78rem; color: #334155; line-height: 1.4;">
+                                <div><strong>Administrador:</strong> Gestion total de perfiles de usuario y contrasenas SHA-256.</div>
+                                <div><strong>Supervisor:</strong> Altas/bajas de inventario, costos, precios, arqueo y Corte Z.</div>
+                                <div><strong>Usuario / Cajero:</strong> Mostrador POS, cobro, ticket y consulta de stock (sin altas ni cortes).</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cuadricula de los 9 Pasos Ilustrados -->
+                    <div class="doc-step-grid">
+                        
+                        <!-- Paso 1 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">1</span>
+                                <h3 class="doc-step-title">Inicio de Sesion y Control RBAC</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Modal de login obligatorio al arrancar. Acceso seguro mediante credenciales individuales validadas con SHA-256 + salt; claves maestras iniciales en el archivo CLAVES.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_1_login_obligatorio.png" target="_blank">
+                                        <img src="screenshot_paso_1_login_obligatorio.png" alt="Paso 1: Login obligatorio" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 2 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">2</span>
+                                <h3 class="doc-step-title">Mostrador POS y Carrito</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Escaneo de codigos de barras, busqueda en tiempo real, desglose de IVA 16%, promociones por mayoreo y selector de descuentos (F3).</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_2_mostrador_pos_cajero.png" target="_blank">
+                                        <img src="screenshot_paso_2_mostrador_pos_cajero.png" alt="Paso 2: Mostrador POS" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 3 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">3</span>
+                                <h3 class="doc-step-title">Cobro Rapido y Cambio (F4)</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Modal de cobro con botones de denominaciones ($50, $100, $200, $500), calculo automatico de cambio y validacion de monto suficiente.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_3_modal_cobro_efectivo.png" target="_blank">
+                                        <img src="screenshot_paso_3_modal_cobro_efectivo.png" alt="Paso 3: Cobro en efectivo" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 4 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">4</span>
+                                <h3 class="doc-step-title">Ticket Termico Oficial</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Generacion de comprobante con LOGO.jpg, folio consecutivo, identificacion del cajero, desglose de IVA y formato para 58mm y 80mm.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_4_ticket_termico_impresion.png" target="_blank">
+                                        <img src="screenshot_paso_4_ticket_termico_impresion.png" alt="Paso 4: Ticket termico" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 5 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">5</span>
+                                <h3 class="doc-step-title">Almacen e Inventarios</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Control de stock minimo, alertas de desabasto. El boton Nuevo Producto (F2) esta habilitado para Supervisor y bloqueado para Cajero.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_5_almacen_inventario_supervisor.png" target="_blank">
+                                        <img src="screenshot_paso_5_almacen_inventario_supervisor.png" alt="Paso 5: Almacen e Inventario" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 6 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">6</span>
+                                <h3 class="doc-step-title">Control de Caja y Corte Z</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Apertura de turno, entradas/salidas, arqueo Corte Z y nuevo modulo de Devoluciones y Cambios de producto (reembolsos, canjes, Kardex, vales termicos y exportacion CSV) exclusivo para Supervisor y Admin.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_6_control_caja_corte_z.png" target="_blank">
+                                        <img src="screenshot_paso_6_control_caja_corte_z.png" alt="Paso 6: Control de caja y Corte Z" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 7 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">7</span>
+                                <h3 class="doc-step-title">Gestion de Perfiles y Claves</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Pestana exclusiva del Administrador para crear usuarios, asignar roles y restablecer contrasenas con cifrado criptografico SHA-256 + salt.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_7_admin_gestion_perfiles.png" target="_blank">
+                                        <img src="screenshot_paso_7_admin_gestion_perfiles.png" alt="Paso 7: Gestion de usuarios" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 8 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">8</span>
+                                <h3 class="doc-step-title">Reportes y Balance Diario (Scroll Optimizado)</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Balance financiero diario, productos mas vendidos, margenes brutos, ticket promedio y exportacion de datos a CSV con UTF-8 BOM, con desplazamiento vertical responsivo sin desbordamiento.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_8_reportes_balance_diario.png" target="_blank">
+                                        <img src="screenshot_paso_8_reportes_balance_diario.png" alt="Paso 8: Reportes y analitica" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 9 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">9</span>
+                                <h3 class="doc-step-title">Historial y Reimpresion</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Consulta de tickets historicos y reimpresion en plano visual superior garantizado (z-index: 10000) sin quedar oculto tras el historial.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_9_historial_ventas_reimpresion.png" target="_blank">
+                                        <img src="screenshot_paso_9_historial_ventas_reimpresion.png" alt="Paso 9: Reimpresion de ticket" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 10 -->
+                        <div class="doc-step-card">
+                            <div class="doc-step-header">
+                                <span class="doc-step-number">10</span>
+                                <h3 class="doc-step-title">Documentacion y Descarga Segura de BD</h3>
+                            </div>
+                            <div class="doc-step-body">
+                                <p>Centro de manuales en PDF (Usuario e Instalacion) y descarga protegida de la base de datos relacional SQLite (papeleria_pos.db) mediante autorizacion criptografica de Administrador.</p>
+                                <div class="doc-step-img-box">
+                                    <a href="screenshot_paso_10_manuales_y_auth_bd.png" target="_blank">
+                                        <img src="screenshot_paso_10_manuales_y_auth_bd.png" alt="Paso 10: Documentacion y descarga segura de base de datos" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SUB-PANE 2: MANUAL TECNICO Y ARQUITECTURA SQL -->
+                <div id="doc-subtab-tecnico" class="doc-subtab-pane">
+                    
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #0f172a;">Arquitectura del Sistema en 4 Capas (Offline-First)</h3>
+                        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0;">
+                            El sistema opera bajo un esquema cliente enriquecido sin dependencia de red externa ni conexiones remotas que comprometan la continuidad de venta:
+                        </p>
+                        <div style="text-align: center; margin-bottom: 16px;">
+                            <a href="arquitectura_tecnica_sistema_pos.png" target="_blank">
+                                <img src="arquitectura_tecnica_sistema_pos.png" alt="Diagrama de Arquitectura en 4 Capas" style="max-width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: var(--shadow-sm);" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #0f172a;">Modelo Entidad-Relacion en Tercera Forma Normal (3FN)</h3>
+                        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0;">
+                            10 tablas relacionales disenadas para consistencia transaccional y eliminacion de redundancias en SQLite 3:
+                        </p>
+                        <div style="text-align: center; margin-bottom: 16px;">
+                            <a href="esquema_relacional_base_datos_sql.png" target="_blank">
+                                <img src="esquema_relacional_base_datos_sql.png" alt="Diagrama Entidad-Relacion SQLite 3FN" style="max-width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: var(--shadow-sm);" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0; font-size: 1.1rem; color: #0f172a;">Scripts SQL DDL Oficiales de Creacion de Tablas</h3>
+                            <button type="button" class="btn-secondary" style="font-size: 0.76rem; padding: 5px 12px; font-weight: 700;" onclick="window.DOCUMENTATION_MODULE.copiarSQLScript()">
+                                Copiar Script SQL DDL
+                            </button>
+                        </div>
+                        <pre class="code-box-ddl"><code>-- =============================================================================
+-- ESQUEMA RELACIONAL SQLITE 3FN - SISTEMA POS PAPELERIA A B C (FASE 8)
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS categorias (
+    id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL UNIQUE,
+    descripcion TEXT,
+    activo INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS marcas (
+    id_marca INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL UNIQUE,
+    pais_origen TEXT DEFAULT 'Mexico',
+    activo INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS unidades_medida (
+    id_unidad INTEGER PRIMARY KEY AUTOINCREMENT,
+    clave TEXT NOT NULL UNIQUE,
+    nombre TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS proveedores (
+    id_proveedor INTEGER PRIMARY KEY AUTOINCREMENT,
+    rfc TEXT NOT NULL UNIQUE,
+    razon_social TEXT NOT NULL,
+    telefono TEXT,
+    email TEXT,
+    activo INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS productos (
+    id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo_barras TEXT NOT NULL UNIQUE,
+    sku TEXT NOT NULL UNIQUE,
+    nombre TEXT NOT NULL,
+    id_categoria INTEGER NOT NULL,
+    id_marca INTEGER NOT NULL,
+    id_unidad INTEGER NOT NULL,
+    precio_compra REAL NOT NULL CHECK(precio_compra >= 0),
+    precio_venta_menudeo REAL NOT NULL CHECK(precio_venta_menudeo > 0),
+    precio_venta_mayoreo REAL NOT NULL CHECK(precio_venta_mayoreo > 0),
+    stock_actual INTEGER NOT NULL DEFAULT 0,
+    stock_minimo INTEGER NOT NULL DEFAULT 5,
+    es_servicio INTEGER NOT NULL DEFAULT 0,
+    permite_desglose INTEGER NOT NULL DEFAULT 0,
+    activo INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (id_marca) REFERENCES marcas(id_marca) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (id_unidad) REFERENCES unidades_medida(id_unidad) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS idx_prod_codigo ON productos(codigo_barras);
+CREATE INDEX IF NOT EXISTS idx_prod_sku ON productos(sku);
+
+CREATE TABLE IF NOT EXISTS usuarios (
+    id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    salt TEXT NOT NULL,
+    nombre_completo TEXT NOT NULL,
+    rol TEXT NOT NULL CHECK(rol IN ('ADMINISTRADOR', 'SUPERVISOR', 'USUARIO', 'CAJERO')),
+    activo INTEGER NOT NULL DEFAULT 1,
+    ultimo_login TEXT
+);
+
+CREATE TABLE IF NOT EXISTS turnos_caja (
+    id_turno INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_usuario INTEGER NOT NULL,
+    fecha_apertura TEXT NOT NULL,
+    monto_inicial REAL NOT NULL DEFAULT 0,
+    fecha_cierre TEXT,
+    monto_final_sistema REAL DEFAULT 0,
+    monto_final_declarado REAL DEFAULT 0,
+    diferencia REAL DEFAULT 0,
+    estado TEXT NOT NULL DEFAULT 'ABIERTO',
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS movimientos_caja (
+    id_movimiento INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_turno INTEGER NOT NULL,
+    tipo TEXT NOT NULL CHECK(tipo IN ('ENTRADA', 'SALIDA')),
+    monto REAL NOT NULL,
+    motivo TEXT NOT NULL,
+    fecha_hora TEXT NOT NULL,
+    FOREIGN KEY (id_turno) REFERENCES turnos_caja(id_turno)
+);
+
+CREATE TABLE IF NOT EXISTS ventas (
+    id_venta INTEGER PRIMARY KEY AUTOINCREMENT,
+    folio_ticket TEXT NOT NULL UNIQUE,
+    id_turno INTEGER NOT NULL,
+    id_usuario INTEGER NOT NULL,
+    fecha_hora TEXT NOT NULL,
+    subtotal REAL NOT NULL,
+    iva REAL NOT NULL,
+    descuento REAL NOT NULL DEFAULT 0,
+    descuento_porcentaje REAL NOT NULL DEFAULT 0,
+    total REAL NOT NULL,
+    metodo_pago TEXT NOT NULL CHECK(metodo_pago IN ('EFECTIVO', 'TARJETA', 'TRANSFERENCIA')),
+    monto_recibido REAL NOT NULL,
+    cambio REAL NOT NULL,
+    FOREIGN KEY (id_turno) REFERENCES turnos_caja(id_turno),
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS detalle_ventas (
+    id_detalle INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_venta INTEGER NOT NULL,
+    id_producto INTEGER NOT NULL,
+    cantidad REAL NOT NULL,
+    precio_unitario REAL NOT NULL,
+    subtotal REAL NOT NULL,
+    es_mayoreo INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (id_venta) REFERENCES ventas(id_venta) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
+
+CREATE TABLE IF NOT EXISTS devoluciones_cambios (
+    id_devolucion INTEGER PRIMARY KEY AUTOINCREMENT,
+    folio TEXT NOT NULL UNIQUE,
+    tipo TEXT NOT NULL CHECK(tipo IN ('DEVOLUCION', 'CAMBIO')),
+    id_producto_devuelto INTEGER NOT NULL,
+    nombre_producto_devuelto TEXT NOT NULL,
+    cantidad_devuelta INTEGER NOT NULL CHECK(cantidad_devuelta > 0),
+    precio_unitario_devuelto REAL NOT NULL,
+    total_devuelto REAL NOT NULL,
+    id_producto_nuevo INTEGER,
+    nombre_producto_nuevo TEXT,
+    cantidad_nueva INTEGER,
+    precio_unitario_nuevo REAL,
+    total_nuevo REAL,
+    diferencia REAL NOT NULL DEFAULT 0,
+    motivo TEXT NOT NULL,
+    autorizado_por TEXT NOT NULL,
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_producto_devuelto) REFERENCES productos(id_producto),
+    FOREIGN KEY (id_producto_nuevo) REFERENCES productos(id_producto)
+);</code></pre>
+                    </div>
+
+                </div>
+
+                <!-- SUB-PANE 3: CATALOGO MUESTRA DE 160 PRODUCTOS -->
+                <div id="doc-subtab-catalogo" class="doc-subtab-pane">
+                    
+                    <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.1rem; color: #0f172a;">Explorador del Catalogo Muestra (160 Articulos Clasificados)</h3>
+                                <p style="margin: 4px 0 0 0; font-size: 0.82rem; color: #64748b;">
+                                    Catalogo completo normalizado con 8 categorias escolares y de oficina, 10 marcas oficiales, precios de menudeo, mayoreo y stock minimo.
+                                </p>
+                            </div>
+                            <span id="doc-catalogo-count-badge" class="badge-cat-doc" style="font-size: 0.8rem; padding: 4px 10px;">
+                                Cargando catalogo...
+                            </span>
+                        </div>
+
+                        <!-- Filtros del Catalogo -->
+                        <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+                            <input type="text" id="doc-catalogo-search" class="form-control" placeholder="Buscar por nombre, codigo de barras o SKU..." style="flex: 1; min-width: 250px; font-size: 0.84rem; padding: 7px 12px;" />
+                            <select id="doc-catalogo-cat-filter" class="form-control" style="width: auto; min-width: 180px; font-size: 0.84rem; padding: 7px 12px;">
+                                <option value="">Todas las categorias</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Productos del Catalogo -->
+                    <div class="table-responsive-box" style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; max-height: 520px; overflow-y: auto;">
+                        <table class="data-table" style="font-size: 0.8rem;">
+                            <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 5;">
+                                <tr>
+                                    <th style="width: 50px;">ID</th>
+                                    <th style="width: 130px;">Codigo Barras</th>
+                                    <th style="width: 110px;">SKU</th>
+                                    <th>Nombre del Articulo</th>
+                                    <th style="width: 130px;">Categoria</th>
+                                    <th style="width: 100px;">Marca</th>
+                                    <th style="width: 80px; text-align: right;">Costo</th>
+                                    <th style="width: 85px; text-align: right;">Precio Vta.</th>
+                                    <th style="width: 90px; text-align: center;">Stock/Min</th>
+                                </tr>
+                            </thead>
+                            <tbody id="doc-catalogo-tbody">
+                                <!-- Poblado dinamicamente por DOCUMENTATION_MODULE -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+    </main>
+
+    <!-- ================= MODAL: COBRO Y PAGO DE TICKET POS ================= -->
+    <div id="modal-checkout" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 450px;">
+            <div class="modal-dialog-header">
+                <h3>Cobro de Ticket en Mostrador</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <div class="modal-dialog-body">
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <div style="font-size: 0.8rem; color: var(--color-slate-light);">TOTAL A COBRAR:</div>
+                    <div id="modal-checkout-total" style="font-size: 2rem; font-weight: 800; color: var(--color-emerald);">$0.00</div>
+                </div>
+
+                <div class="form-group-field" style="margin-bottom: 10px;">
+                    <label style="font-size: 0.8rem; font-weight: 700;">Descuento Especial de Venta:</label>
+                    <div class="quick-discount-buttons" style="display: flex; gap: 6px; margin-top: 4px;">
+                        <button type="button" class="btn-discount active" data-pct="0" onclick="window.POS_MODULE.setDescuento(0)">0%</button>
+                        <button type="button" class="btn-discount" data-pct="5" onclick="window.POS_MODULE.setDescuento(5)">5%</button>
+                        <button type="button" class="btn-discount" data-pct="10" onclick="window.POS_MODULE.setDescuento(10)">10%</button>
+                        <button type="button" class="btn-discount" data-pct="15" onclick="window.POS_MODULE.setDescuento(15)">15%</button>
+                    </div>
+                </div>
+
+                <div class="form-group-field">
+                    <label for="checkout-metodo-pago">Método de Pago:</label>
+                    <select id="checkout-metodo-pago" class="form-control-select">
+                        <option value="EFECTIVO">Efectivo</option>
+                        <option value="TARJETA">Tarjeta Débito / Crédito</option>
+                        <option value="TRANSFERENCIA">Transferencia SPEI</option>
+                    </select>
+                </div>
+
+                <div class="form-group-field">
+                    <label for="checkout-efectivo-recibido">Monto Recibido del Cliente ($ MXN):</label>
+                    <input type="number" id="checkout-efectivo-recibido" class="form-control-input font-bold" style="font-size: 1.15rem;" step="0.5" oninput="window.POS_MODULE.calcularCambio()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.POS_MODULE.confirmarVenta();}">
+                </div>
+
+                <div id="quick-cash-container" style="margin-top: 4px; margin-bottom: 12px;">
+                    <div style="font-size: 0.72rem; color: var(--color-slate-light); margin-bottom: 4px; font-weight: 600;">Denominación Rápida de Efectivo:</div>
+                    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;">
+                        <button type="button" class="btn-quick-cash" onclick="window.POS_MODULE.setEfectivoRapido('exacto')">Exacto</button>
+                        <button type="button" class="btn-quick-cash" onclick="window.POS_MODULE.setEfectivoRapido(50)">$50</button>
+                        <button type="button" class="btn-quick-cash" onclick="window.POS_MODULE.setEfectivoRapido(100)">$100</button>
+                        <button type="button" class="btn-quick-cash" onclick="window.POS_MODULE.setEfectivoRapido(200)">$200</button>
+                        <button type="button" class="btn-quick-cash" onclick="window.POS_MODULE.setEfectivoRapido(500)">$500</button>
+                        <button type="button" class="btn-quick-cash" onclick="window.POS_MODULE.setEfectivoRapido(1000)">$1000</button>
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px dashed var(--color-border); border-radius: 6px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <span style="font-size: 0.85rem; font-weight: 700;">Cambio a Devolver:</span>
+                    <span id="checkout-cambio-devuelto" style="font-size: 1.3rem; font-weight: 800; color: var(--color-emerald);">$0.00</span>
+                </div>
+            </div>
+            <div class="modal-dialog-footer">
+                <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                <button type="button" id="btn-confirmar-cobro" class="btn-primary-action" style="padding: 8px 18px;" onclick="window.POS_MODULE.confirmarVenta()">
+                    Confirmar y Emitir Ticket
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: TICKET TÉRMICO PREVIEW ================= -->
+    <div id="modal-ticket-preview" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 360px;">
+            <div class="modal-dialog-header">
+                <h3>Ticket de Venta Emitido</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.cerrarTicketPreview ? window.cerrarTicketPreview() : window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <div class="modal-dialog-body" id="ticket-render-zone">
+                <!-- Inyectado dinámicamente -->
+            </div>
+            <div class="modal-dialog-footer">
+                <button type="button" class="btn-secondary" data-action="close" onclick="window.cerrarTicketPreview ? window.cerrarTicketPreview() : window.closeAllModals()">Cerrar</button>
+                <button type="button" class="btn-primary-action" onclick="window.print()">Imprimir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: COPIAS E IMPRESIONES RÁPIDAS [F4] ================= -->
+    <div id="modal-servicios-copias" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 440px;">
+            <div class="modal-dialog-header">
+                <h3>Copias e Impresiones Rápidas [F4]</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <div class="modal-dialog-body">
+                <div class="form-group-field">
+                    <label for="input-cant-copias-bn">Fotocopias Blanco y Negro ($1.00 c/u):</label>
+                    <input type="number" id="input-cant-copias-bn" class="form-control-input font-bold" min="0" placeholder="Ej. 10">
+                </div>
+                <div class="form-group-field">
+                    <label for="input-cant-copias-color">Fotocopias / Impresión Color ($5.00 c/u):</label>
+                    <input type="number" id="input-cant-copias-color" class="form-control-input font-bold" min="0" placeholder="Ej. 2">
+                </div>
+                <div class="form-group-field">
+                    <label for="input-cant-enmicados">Enmicado Tamaño Carta ($15.00 c/u):</label>
+                    <input type="number" id="input-cant-enmicados" class="form-control-input font-bold" min="0" placeholder="Ej. 1">
+                </div>
+            </div>
+            <div class="modal-dialog-footer">
+                <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                <button type="button" class="btn-primary-action" onclick="window.POS_MODULE.agregarServiciosAlCarrito()">
+                    Agregar al Carrito
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: ALTA Y EDICIÓN DE PRODUCTO ================= -->
+    <div id="modal-product-form" class="modal-overlay">
+        <div class="modal-dialog-box">
+            <div class="modal-dialog-header">
+                <h3 id="modal-product-title">Nuevo Artículo para Papelería A B C</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <form id="form-product" onsubmit="window.INVENTORY_MODULE.handleProductFormSubmit(event)">
+                <div class="modal-dialog-body">
+                    <input type="hidden" id="prod-id">
+
+                    <div class="form-grid-2col">
+                        <div class="form-group-field">
+                            <label for="prod-barcode">Código de Barras (EAN-13 / Personalizado) *</label>
+                            <div style="display: flex; gap: 6px;">
+                                <input type="text" id="prod-barcode" class="form-control-input font-mono" placeholder="750..." required>
+                                <button type="button" class="btn-secondary" title="Generar código de barras sugerido" onclick="window.INVENTORY_MODULE.generateBarcodeEAN13()">Generar</button>
+                            </div>
+                        </div>
+                        <div class="form-group-field">
+                            <label for="prod-sku">Clave SKU Interna *</label>
+                            <input type="text" id="prod-sku" class="form-control-input font-mono" placeholder="Ej. SC-CUAD-01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group-field">
+                        <label for="prod-nombre">Nombre Comercial del Producto *</label>
+                        <input type="text" id="prod-nombre" class="form-control-input font-bold" placeholder="Ej. Cuaderno Profesional Raya 100 Hojas Scribe" required>
+                    </div>
+
+                    <div class="form-grid-2col">
+                        <div class="form-group-field">
+                            <label for="prod-categoria">Categoría / Familia *</label>
+                            <select id="prod-categoria" class="form-control-select" required>
+                                <option value="">-- Seleccionar Categoría --</option>
+                            </select>
+                        </div>
+                        <div class="form-group-field">
+                            <label for="prod-marca">Marca Oficial *</label>
+                            <select id="prod-marca" class="form-control-select" required>
+                                <option value="">-- Seleccionar Marca --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2col">
+                        <div class="form-group-field">
+                            <label for="prod-unidad">Unidad de Medida *</label>
+                            <select id="prod-unidad" class="form-control-select" required>
+                                <option value="">-- Seleccionar Unidad --</option>
+                            </select>
+                        </div>
+                        <div class="form-group-field">
+                            <label for="prod-precio-compra">Costo de Compra ($ MXN) *</label>
+                            <input type="number" id="prod-precio-compra" class="form-control-input" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2col">
+                        <div class="form-group-field">
+                            <label for="prod-precio-menudeo">Precio Venta Menudeo ($ MXN) *</label>
+                            <input type="number" id="prod-precio-menudeo" class="form-control-input font-bold" step="0.01" min="0.01" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group-field">
+                            <label for="prod-precio-mayoreo">Precio Venta Mayoreo ($ MXN)</label>
+                            <input type="number" id="prod-precio-mayoreo" class="form-control-input" step="0.01" min="0" placeholder="Opcional">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2col">
+                        <div class="form-group-field">
+                            <label for="prod-stock-actual">Stock Inicial / Existencia Actual *</label>
+                            <input type="number" id="prod-stock-actual" class="form-control-input" step="1" min="0" value="10" required>
+                        </div>
+                        <div class="form-group-field">
+                            <label for="prod-stock-minimo">Stock Mínimo (Alerta de Reorden) *</label>
+                            <input type="number" id="prod-stock-minimo" class="form-control-input" step="1" min="0" value="3" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2col" style="margin-top: 4px;">
+                        <label class="checkbox-filter-label" style="background: none; border: none; padding: 0; color: var(--color-slate-dark);">
+                            <input type="checkbox" id="prod-es-servicio"> Es servicio / copia (No descuenta stock)
+                        </label>
+                        <label class="checkbox-filter-label" style="background: none; border: none; padding: 0; color: var(--color-slate-dark);">
+                            <input type="checkbox" id="prod-permite-desglose"> Permite desglose de caja a piezas
+                        </label>
+                    </div>
+
+                    <div class="form-group-field" style="margin-top: 8px;">
+                        <label for="prod-descripcion">Descripción Adicional</label>
+                        <textarea id="prod-descripcion" class="form-control-textarea" rows="2" placeholder="Detalles de color, presentación..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-dialog-footer">
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                    <button type="submit" class="btn-primary-action">Guardar en Base de Datos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: ALTA Y EDICIÓN DE MARCA ================= -->
+    <div id="modal-marca-form" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 450px;">
+            <div class="modal-dialog-header">
+                <h3 id="modal-marca-title">Nueva Marca</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <form id="form-marca" onsubmit="window.MASTERS_MODULE.handleMarcaFormSubmit(event)">
+                <div class="modal-dialog-body">
+                    <input type="hidden" id="marca-id">
+                    <div class="form-group-field">
+                        <label for="marca-nombre">Nombre de la Marca *</label>
+                        <input type="text" id="marca-nombre" class="form-control-input font-bold" placeholder="Ej. Faber-Castell" required>
+                    </div>
+                    <div class="form-group-field">
+                        <label for="marca-pais">País de Origen</label>
+                        <input type="text" id="marca-pais" class="form-control-input" placeholder="Ej. Alemania">
+                    </div>
+                    <div class="form-group-field">
+                        <label for="marca-descripcion">Descripción</label>
+                        <textarea id="marca-descripcion" class="form-control-textarea" rows="2" placeholder="Notas comerciales..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-dialog-footer">
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                    <button type="submit" class="btn-primary-action">Guardar Marca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: ALTA Y EDICIÓN DE CATEGORÍA ================= -->
+    <div id="modal-categoria-form" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 450px;">
+            <div class="modal-dialog-header">
+                <h3 id="modal-categoria-title">Nueva Categoría</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <form id="form-categoria" onsubmit="window.MASTERS_MODULE.handleCategoriaFormSubmit(event)">
+                <div class="modal-dialog-body">
+                    <input type="hidden" id="cat-id">
+                    <div class="form-group-field">
+                        <label for="cat-nombre">Nombre de la Categoría *</label>
+                        <input type="text" id="cat-nombre" class="form-control-input font-bold" placeholder="Ej. Papeles Especiales" required>
+                    </div>
+                    <div class="form-group-field">
+                        <label for="cat-descripcion">Descripción del Alcance</label>
+                        <textarea id="cat-descripcion" class="form-control-textarea" rows="2" placeholder="Alcance de la familia..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-dialog-footer">
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                    <button type="submit" class="btn-primary-action">Guardar Categoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+        <!-- ================= MODAL: HISTORIAL Y ANÁLISIS DE VENTAS [F8] ================= -->
+    <div id="modal-historial-ventas" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 1040px; width: 95vw; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-dialog-header" style="flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h3 style="margin: 0;">Historial y Análisis de Ventas (Papelería A B C)</h3>
+                    <span id="historial-tickets-count-badge" class="meta-chip" style="background: rgba(255,255,255,0.2); font-size: 0.75rem; padding: 2px 8px; border-radius: 12px;">0 tickets</span>
+                </div>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            
+            <div class="modal-dialog-body" style="padding: 16px 20px; overflow-y: auto; flex: 1;">
+                
+                <!-- KPI Analysis Bar -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+                    <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 14px;">
+                        <small style="color: var(--color-slate-light); font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">Total Transacciones</small>
+                        <div id="hist-kpi-count" style="font-size: 1.2rem; font-weight: 800; color: var(--color-primary); margin-top: 2px;">0 tickets</div>
+                        <small id="hist-kpi-items" style="color: var(--color-slate-light); font-size: 0.72rem;">0 artículos vendidos</small>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 14px;">
+                        <small style="color: var(--color-slate-light); font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">Monto Total Cobrado</small>
+                        <div id="hist-kpi-total" style="font-size: 1.2rem; font-weight: 800; color: var(--color-emerald); margin-top: 2px;">$0.00</div>
+                        <small id="hist-kpi-iva" style="color: var(--color-slate-light); font-size: 0.72rem;">IVA trasl.: $0.00</small>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 14px;">
+                        <small style="color: var(--color-slate-light); font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">Ticket Promedio</small>
+                        <div id="hist-kpi-avg" style="font-size: 1.2rem; font-weight: 800; color: #0284c7; margin-top: 2px;">$0.00</div>
+                        <small style="color: var(--color-slate-light); font-size: 0.72rem;">Promedio por compra</small>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 14px;">
+                        <small style="color: var(--color-slate-light); font-weight: 700; font-size: 0.68rem; text-transform: uppercase;">Mezcla de Pago</small>
+                        <div id="hist-kpi-mix" style="font-size: 0.78rem; font-weight: 700; margin-top: 4px; line-height: 1.3;">
+                            <span style="color: var(--color-emerald);">Efvo: $0.00</span> | 
+                            <span style="color: #0284c7;">Tarj: $0.00</span><br>
+                            <span style="color: #7c3aed;">SPEI: $0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra de Búsqueda y Filtros de Análisis -->
+                <div style="display: flex; gap: 10px; margin-bottom: 0; flex-wrap: wrap; background: #ffffff; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: 8px; align-items: center;">
+                    <div style="flex: 1; min-width: 240px; position: relative;">
+                        <input type="text" id="historial-search-input" class="form-control-input" 
+                            placeholder="Buscar por folio (TICK-00001), cajero o producto..." 
+                            style="padding: 8px 12px; font-size: 0.85rem;" 
+                            oninput="window.POS_MODULE.filtrarHistorialVentas()">
+                    </div>
+                    <div style="width: 170px;">
+                        <select id="historial-filtro-metodo" class="form-control-select" style="padding: 8px 10px; font-size: 0.85rem;" onchange="window.POS_MODULE.filtrarHistorialVentas()">
+                            <option value="TODOS">Todos los Métodos</option>
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="TARJETA">Tarjeta</option>
+                            <option value="TRANSFERENCIA">Transferencia SPEI</option>
+                        </select>
+                    </div>
+                    <div style="width: 160px;">
+                        <select id="historial-filtro-periodo" class="form-control-select" style="padding: 8px 10px; font-size: 0.85rem;" onchange="window.POS_MODULE.filtrarHistorialVentas()">
+                            <option value="HOY">Ventas de Hoy</option>
+                            <option value="TODOS">Todo el Historial</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn-secondary" style="font-size: 0.8rem; padding: 8px 12px;" onclick="window.POS_MODULE.resetFiltrosHistorial()">
+                        Limpiar Filtros
+                    </button>
+                </div>
+
+                <!-- Tabla de Resultados con Estilo Amplio y Claro -->
+                <div style="border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; background: #ffffff;">
+                    <div style="max-height: 42vh; overflow-y: auto;">
+                        <table class="inventory-data-table" style="font-size: 0.82rem; margin: 0; width: 100%;">
+                            <thead>
+                                <tr style="position: sticky; top: 0; background: #f1f5f9; z-index: 2;">
+                                    <th style="width: 110px;">Folio Ticket</th>
+                                    <th style="width: 135px;">Fecha / Hora</th>
+                                    <th style="width: 140px;">Cajero</th>
+                                    <th style="width: 110px;">Método</th>
+                                    <th>Artículos Vendidos</th>
+                                    <th class="text-right" style="width: 95px;">Subtotal</th>
+                                    <th class="text-right" style="width: 110px;">Total Cobrado</th>
+                                    <th class="text-center" style="width: 105px;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historial-ventas-tbody">
+                                <!-- Inyectado dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-dialog-footer" style="display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; background: #f8fafc; border-top: 1px solid var(--color-border);">
+                <div style="font-size: 0.82rem; color: var(--color-slate-light); font-weight: 600;">
+                    <span id="historial-filtered-count">0</span> ventas encontradas
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-primary-action" onclick="window.POS_MODULE.exportarVentasDiaCSV()" title="Descargar reporte detallado de ventas en formato CSV para Excel">
+                        Exportar Ventas del Día (.CSV)
+                    </button>
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: MOVIMIENTO DE EFECTIVO EN CAJA ================= -->
+    <div id="modal-movimiento-caja" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 460px;">
+            <div class="modal-dialog-header">
+                <h3 id="modal-mov-title">Movimiento de Efectivo</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <form onsubmit="window.CASH_MODULE.handleMovimientoCajaSubmit(event)">
+                <div class="modal-dialog-body">
+                    <div class="form-group-field">
+                        <label for="mov-caja-tipo">Tipo de Movimiento:</label>
+                        <select id="mov-caja-tipo" class="form-control-select">
+                            <option value="ENTRADA">Entrada de Efectivo (Fondo extra / Cambio)</option>
+                            <option value="RETIRO">Retiro de Efectivo (Gasto menor / Proveedor)</option>
+                        </select>
+                    </div>
+                    <div class="form-group-field">
+                        <label for="mov-caja-monto">Monto en Efectivo ($ MXN) *:</label>
+                        <input type="number" id="mov-caja-monto" class="form-control-input font-bold" step="0.5" min="1" placeholder="Ej. 150.00" required>
+                    </div>
+                    <div class="form-group-field">
+                        <label for="mov-caja-concepto">Concepto / Motivo de Justificación *:</label>
+                        <input type="text" id="mov-caja-concepto" class="form-control-input" placeholder="Ej. Compra de rollos térmicos de emergencia" required>
+                    </div>
+                </div>
+                <div class="modal-dialog-footer">
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                    <button type="submit" class="btn-primary-action">Guardar Movimiento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: GESTIÓN DE DEVOLUCIÓN O CAMBIO DE PRODUCTO (RF-08 / RBAC) ================= -->
+    <div id="modal-devolucion-cambio" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 640px;">
+            <div class="modal-dialog-header">
+                <div>
+                    <h3 style="margin: 0;">Gestión de Devolución o Cambio de Mercancía</h3>
+                    <small style="color: var(--color-slate-light); font-size: 0.72rem;">Operación autorizada exclusivamente para Supervisor y Administrador</small>
+                </div>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <form id="form-devolucion-cambio" onsubmit="window.CASH_MODULE.handleDevolucionCambioSubmit(event)">
+                <div class="modal-dialog-body" style="padding: 16px 20px; max-height: 75vh; overflow-y: auto;">
+                    
+                    <!-- Selector de Modo de Operación -->
+                    <div style="background: #f1f5f9; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; gap: 20px; align-items: center; justify-content: center;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.88rem; cursor: pointer; color: var(--color-primary);">
+                            <input type="radio" name="modo_operacion" id="modo-op-devolucion" value="DEVOLUCION" checked onchange="window.CASH_MODULE.onModoOperacionChange()">
+                            Devolución (Reembolso de Dinero)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.88rem; cursor: pointer; color: var(--color-primary);">
+                            <input type="radio" name="modo_operacion" id="modo-op-cambio" value="CAMBIO" onchange="window.CASH_MODULE.onModoOperacionChange()">
+                            Cambio de Producto (Canje)
+                        </label>
+                    </div>
+
+                    <!-- Datos Generales -->
+                    <div class="form-grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group-field">
+                            <label for="dev-ticket-origen">Folio Ticket de Compra Origen:</label>
+                            <input type="text" id="dev-ticket-origen" class="form-control-input" placeholder="Ej. TICK-00020 (Opcional)" oninput="window.CASH_MODULE.onTicketOrigenInput()">
+                        </div>
+                        <div class="form-group-field">
+                            <label for="dev-autorizado-por">Autorizado Por (Supervisor / Admin) *:</label>
+                            <input type="text" id="dev-autorizado-por" class="form-control-input" readonly style="background: #f8fafc; font-weight: 700;">
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN: PRODUCTO DEVUELTO POR EL CLIENTE -->
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; background: #ffffff;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #b91c1c; text-transform: uppercase; font-weight: 800;">
+                            1. Mercancía Devuelta por el Cliente
+                        </h4>
+                        <div class="form-group-field" style="margin-bottom: 10px;">
+                            <label for="dev-producto-select">Artículo a Devolver *:</label>
+                            <select id="dev-producto-select" class="form-control-select" required onchange="window.CASH_MODULE.recalcularValoresDevolucion()">
+                                <option value="">-- Seleccionar Artículo del Catálogo --</option>
+                            </select>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                            <div class="form-group-field">
+                                <label for="dev-cantidad">Cantidad a Devolver *:</label>
+                                <input type="number" id="dev-cantidad" class="form-control-input font-bold" min="1" step="1" value="1" required oninput="window.CASH_MODULE.recalcularValoresDevolucion()">
+                            </div>
+                            <div class="form-group-field">
+                                <label for="dev-precio-unitario">Precio Unitario ($):</label>
+                                <input type="text" id="dev-precio-unitario" class="form-control-input" readonly value="$0.00" style="background: #f8fafc; font-weight: 700;">
+                            </div>
+                            <div class="form-group-field">
+                                <label for="dev-subtotal-devuelto">Subtotal a Favor Cliente:</label>
+                                <input type="text" id="dev-subtotal-devuelto" class="form-control-input" readonly value="$0.00" style="background: #f8fafc; font-weight: 800; color: #b91c1c;">
+                            </div>
+                        </div>
+                        <div class="form-group-field" style="margin-top: 8px; margin-bottom: 0;">
+                            <label for="dev-estado-producto">Estado del Artículo Devuelto *:</label>
+                            <select id="dev-estado-producto" class="form-control-select" required>
+                                <option value="BUENO">Buen Estado (Apto para venta - Reintegrar a Stock)</option>
+                                <option value="DEFECTUOSO">Defectuoso / Mal Estado de Origen (Registrar como Merma)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN: PRODUCTO NUEVO A ENTREGAR (SOLO EN MODO CAMBIO) -->
+                    <div id="sec-producto-nuevo-cambio" style="display: none; border: 1px solid #93c5fd; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; background: #f0f9ff;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0369a1; text-transform: uppercase; font-weight: 800;">
+                            2. Mercancía Nueva a Entregar (Canje)
+                        </h4>
+                        <div class="form-group-field" style="margin-bottom: 10px;">
+                            <label for="cam-producto-nuevo-select">Artículo Nuevo a Entregar *:</label>
+                            <select id="cam-producto-nuevo-select" class="form-control-select" onchange="window.CASH_MODULE.recalcularValoresDevolucion()">
+                                <option value="">-- Seleccionar Artículo de Reemplazo --</option>
+                            </select>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                            <div class="form-group-field">
+                                <label for="cam-cantidad-nueva">Cantidad Nueva *:</label>
+                                <input type="number" id="cam-cantidad-nueva" class="form-control-input font-bold" min="1" step="1" value="1" oninput="window.CASH_MODULE.recalcularValoresDevolucion()">
+                            </div>
+                            <div class="form-group-field">
+                                <label for="cam-precio-nuevo">Precio Unitario ($):</label>
+                                <input type="text" id="cam-precio-nuevo" class="form-control-input" readonly value="$0.00" style="background: #ffffff; font-weight: 700;">
+                            </div>
+                            <div class="form-group-field">
+                                <label for="cam-subtotal-nuevo">Total Artículo Nuevo:</label>
+                                <input type="text" id="cam-subtotal-nuevo" class="form-control-input" readonly value="$0.00" style="background: #ffffff; font-weight: 800; color: #0369a1;">
+                            </div>
+                        </div>
+                        <small id="cam-stock-aviso" style="display: block; margin-top: 6px; font-size: 0.74rem; color: var(--color-slate-light);">Stock disponible para canje: -</small>
+                    </div>
+
+                    <!-- BALANCE Y RESUMEN FINANCIERO DINÁMICO -->
+                    <div id="resumen-financiero-caja" style="background: #f8fafc; border: 2px dashed var(--color-border); border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-size: 0.82rem; font-weight: 700; color: var(--color-slate-dark);">Balance Financiero de Caja:</span>
+                            <span id="label-tipo-balance" style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase;">REEMBOLSO DE EFECTIVO</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <small id="desc-efecto-caja" style="font-size: 0.78rem; color: var(--color-slate-light);">Se retirará efectivo del cajón para devolver al cliente.</small>
+                            <b id="monto-efecto-caja" style="font-size: 1.35rem; color: #b91c1c;">-$0.00</b>
+                        </div>
+                    </div>
+
+                    <!-- MOTIVO Y JUSTIFICACIÓN AUDITABLE -->
+                    <div class="form-group-field" style="margin-bottom: 10px;">
+                        <label for="dev-motivo-select">Motivo de la Devolución / Cambio *:</label>
+                        <select id="dev-motivo-select" class="form-control-select" required>
+                            <option value="">-- Seleccionar Motivo Operativo --</option>
+                            <option value="Error de compra por parte del cliente">Cliente compró artículo equivocado</option>
+                            <option value="Defecto de fábrica o mal funcionamiento">Defecto de fábrica / tinta seca / empaque roto</option>
+                            <option value="Inconformidad con el producto">Inconformidad con especificaciones o color</option>
+                            <option value="Doble cobro o duplicidad involuntaria">Duplicidad o cobro indebido</option>
+                            <option value="Garantía de satisfacción de tienda">Garantía comercial de Papelería A B C</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 4px;">
+                        <label for="dev-justificacion">Observaciones / Justificación de Auditoría *:</label>
+                        <textarea id="dev-justificacion" class="form-control-textarea" rows="2" placeholder="Detalle las razones y condición física del artículo..." required></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-dialog-footer">
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                    <button type="submit" id="btn-submit-devolucion" class="btn-primary-action" style="padding: 9px 20px; font-weight: 700;">Confirmar y Procesar en Caja</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: COMPROBANTE OFICIAL DE DEVOLUCIÓN O CAMBIO ================= -->
+    <div id="modal-comprobante-devolucion" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 420px;">
+            <div class="modal-dialog-header">
+                <h3>Comprobante de Devolución / Cambio</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <div class="modal-dialog-body" id="comprobante-devolucion-render-zone">
+                <!-- Inyectado dinámicamente -->
+            </div>
+            <div class="modal-dialog-footer">
+                <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cerrar</button>
+                <button type="button" class="btn-primary-action" onclick="window.print()">Imprimir Comprobante</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: INICIO DE SESIÓN Y AUTENTICACIÓN (RF-09) ================= -->
+    
+    <!-- ================= MODAL: AUTORIZACIÓN DE ADMINISTRADOR PARA DESCARGA DE BD ================= -->
+    <div id="modal-auth-descarga-bd" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 440px;">
+            <div class="modal-dialog-header">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--color-primary);">Autorización de Administrador Requerida</h3>
+                    <small style="color: var(--color-slate-light); font-size: 0.74rem;">Protección de datos comerciales y registros confidenciales</small>
+                </div>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <form id="form-auth-descarga-bd" onsubmit="window.DOCUMENTATION_MODULE.handleAuthDescargaBDSubmit(event)">
+                <div class="modal-dialog-body" style="padding: 18px 20px;">
+                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+                        <p style="margin: 0; font-size: 0.78rem; color: #991b1b; line-height: 1.4;">
+                            <strong>Aviso de Seguridad:</strong> La descarga de la base de datos relacional (papeleria_pos.db) extrae los registros de ventas, catálogo, inventario y usuarios con salting criptográfico. Para continuar, ingrese las credenciales de un <strong>Administrador</strong>.
+                        </p>
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 12px;">
+                        <label for="auth-bd-username" style="font-size: 0.82rem; font-weight: 700; color: var(--color-slate-dark);">Usuario Administrador *:</label>
+                        <input type="text" id="auth-bd-username" class="form-control-input" placeholder="Ej. admin" required autocomplete="username">
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 10px;">
+                        <label for="auth-bd-password" style="font-size: 0.82rem; font-weight: 700; color: var(--color-slate-dark);">Contraseña de Administrador *:</label>
+                        <input type="password" id="auth-bd-password" class="form-control-input" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+
+                    <div id="auth-bd-error" style="display: none; background: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 8px 12px; border-radius: 6px; font-size: 0.76rem; font-weight: 600; margin-top: 10px;"></div>
+                </div>
+                <div class="modal-dialog-footer">
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                    <button type="submit" class="btn-primary-action" style="padding: 9px 18px; font-weight: 700; background: #0f766e;">Autorizar y Descargar BD</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<div id="modal-login" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 440px;">
+            <div class="modal-dialog-header">
+                <h3>Control de Acceso al Sistema</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.AUTH_MODULE.cerrarModalLogin()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <div class="modal-dialog-body" style="padding: 22px;">
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <img src="LOGO.jpg" alt="Papelería A B C" style="height: 60px; max-width: 160px; object-fit: contain; margin-bottom: 6px;">
+                    <h4 style="margin: 0; color: var(--color-primary); font-size: 1.05rem;">Papelería A B C</h4>
+                    <p style="margin: 0; font-size: 0.76rem; color: var(--color-slate-light);">Identificación de Usuario y Privilegios de Acceso</p>
+                </div>
+
+                <div id="login-alert" style="display: none; background: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 12px; font-weight: 600;"></div>
+
+                <form id="form-login" onsubmit="window.AUTH_MODULE.handleLoginSubmit(event)">
+                    <div class="form-group-field" style="margin-bottom: 12px;">
+                        <label for="login-username" style="font-size: 0.8rem; font-weight: 700;">Nombre de Usuario *</label>
+                        <input type="text" id="login-username" class="form-control-input font-bold" placeholder="Ej. admin, supervisor, cajero" required autocomplete="username">
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 16px;">
+                        <label for="login-password" style="font-size: 0.8rem; font-weight: 700;">Contraseña de Acceso (Cifrado SHA-256) *</label>
+                        <input type="password" id="login-password" class="form-control-input" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="btn-checkout-action" style="padding: 10px; font-size: 0.92rem; margin-bottom: 0;">
+                        Iniciar Sesión Segura
+                    </button>
+                </form>
+
+
+            </div>
+            <div class="modal-dialog-footer">
+                <button type="button" class="btn-secondary" data-action="close" onclick="window.AUTH_MODULE.cerrarModalLogin()">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: ALTA Y EDICIÓN DE USUARIO (RBAC) ================= -->
+    <div id="modal-usuario-form" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 480px;">
+            <div class="modal-dialog-header">
+                <h3 id="modal-usuario-title">Nuevo Usuario del Sistema</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <form id="form-usuario" onsubmit="window.AUTH_MODULE.handleUsuarioFormSubmit(event)">
+                <div class="modal-dialog-body" style="padding: 18px;">
+                    <input type="hidden" id="user-id">
+
+                    <div class="form-group-field" style="margin-bottom: 10px;">
+                        <label for="user-username">Nombre de Usuario (Login) *</label>
+                        <input type="text" id="user-username" class="form-control-input font-bold font-mono" placeholder="Ej. gerardo.cabrera" required>
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 10px;">
+                        <label for="user-nombre">Nombre Completo del Responsable *</label>
+                        <input type="text" id="user-nombre" class="form-control-input" placeholder="Ej. Gerardo Cabrera Morales" required>
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 10px;">
+                        <label for="user-rol">Rol / Nivel de Privilegios *</label>
+                        <select id="user-rol" class="form-control-select font-bold" required>
+                            <option value="ADMINISTRADOR">ADMINISTRADOR — Administración de Perfiles y Contraseñas</option>
+                            <option value="SUPERVISOR">SUPERVISOR — Altas de Catálogo (Arts, Cats, Marcas) y Cortes de Caja</option>
+                            <option value="USUARIO">USUARIO — Mostrador POS y Operación de Ventas</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-field" style="margin-bottom: 10px;">
+                        <label for="user-password">Contraseña (Encriptada con SHA-256 + Salt) *</label>
+                        <input type="password" id="user-password" class="form-control-input" placeholder="Mínimo 6 caracteres">
+                        <small id="user-password-hint" style="display: none; color: var(--color-slate-light); font-size: 0.72rem; margin-top: 3px;">
+                            Deje este campo vacío si desea conservar la contraseña actual sin cambios.
+                        </small>
+                    </div>
+
+                    <div style="margin-top: 8px;">
+                        <label class="checkbox-filter-label" style="background: none; border: none; padding: 0; color: var(--color-slate-dark);">
+                            <input type="checkbox" id="user-activo" checked> Cuenta activa (Permite iniciar sesión en mostrador)
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-dialog-footer">
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cancelar</button>
+                    <button type="submit" class="btn-primary-action">Guardar Usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: COMPROBANTE OFICIAL DE CORTE Z ================= -->
+    <div id="modal-corte-reporte-z" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 420px;">
+            <div class="modal-dialog-header">
+                <h3>Comprobante de Corte de Turno (Reporte Z)</h3>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)">&times;</button>
+            </div>
+            <div class="modal-dialog-body" id="corte-z-render-zone">
+                <!-- Inyectado dinámicamente -->
+            </div>
+            <div class="modal-dialog-footer">
+                <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()">Cerrar</button>
+                <button type="button" class="btn-primary-action" onclick="window.print()">Imprimir Corte Z</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Contenedor flotante de notificaciones Toast -->
+    
+    <!-- ================= MODAL: REPORTE EJECUTIVO PDF (VENTAS SEMANA/MES/AÑO, CAJEROS Y EVENTOS) ================= -->
+    <div id="modal-reporte-pdf" class="modal-overlay">
+        <div class="modal-dialog-box" style="max-width: 980px; width: 95vw; max-height: 92vh; display: flex; flex-direction: column;">
+            <div class="modal-dialog-header" style="flex-shrink: 0; background: #0f172a; color: #ffffff; padding: 12px 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #ffffff;">Reporte Ejecutivo y Auditoria Integral - Papeleria A B C</h3>
+                </div>
+                <button type="button" class="btn-modal-close" data-action="close" onclick="window.closeAllModals()" title="Cerrar (Esc)" style="color: #cbd5e1;">&times;</button>
+            </div>
+            <div class="modal-dialog-body" style="padding: 18px 24px; overflow-y: auto; flex: 1; background: #f8fafc;">
+                <!-- Area imprimible y visual del reporte -->
+                <div id="reporte-pdf-render-zone" class="report-pdf-printable-area">
+                    <!-- Inyectado dinamicamente -->
+                </div>
+            </div>
+            <div class="modal-dialog-footer" style="display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; background: #f1f5f9; border-top: 1px solid var(--color-border); padding: 10px 20px; flex-wrap: wrap; gap: 8px;">
+                <div style="font-size: 0.76rem; color: var(--color-slate-light); font-weight: 600;">
+                    Documento Oficial Con Validez Administrativa | Papeleria A B C
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="btn-secondary" data-action="close" onclick="window.closeAllModals()" style="font-size: 0.78rem;">Cerrar</button>
+                    <button type="button" class="btn-primary-action" style="background: #0284c7; padding: 7px 14px; font-size: 0.78rem;" onclick="window.REPORTS_MODULE.descargarReporteHTMLPDF()" title="Descargar documento HTML autonomo de alta fidelidad">Descargar HTML</button>
+                    <button type="button" class="btn-primary-action" style="background: #b91c1c; padding: 7px 14px; font-size: 0.78rem; font-weight: 700;" onclick="window.REPORTS_MODULE.descargarReportePDFBinario()" title="Descargar archivo binario PDF nativo directamente">Descargar PDF (.PDF)</button>
+                    <button type="button" class="btn-primary-action" style="background: #0f172a; padding: 7px 14px; font-size: 0.78rem;" onclick="window.print()" title="Imprimir en impresora o Guardar como PDF del navegador">Imprimir / Guardar como PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <!-- Scripts de la arquitectura unificada POS & Almacén Papelería A B C -->
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/catalog_masters.js"></script>
+    <script src="js/stock_movements.js"></script>
+    <script src="js/import_export.js"></script>
+    <script src="js/pos.js"></script>
+    <script src="js/cash.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="js/documentation.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
